@@ -58,8 +58,8 @@ python3 -m http.server
 
 ### Customize & Preview workbench
 
-Open **Customize & Preview** in the global navigation for the dedicated workbench.
-The **Button library** tab contains the gallery and its palette. Select **Add to
+Open **Workbench** in the top bar for the dedicated workbench.
+The **Library** tab contains the gallery; its **Colors** menu holds the palette. Select **Add to
 workbench** on any library card to open it in the comparison tray. Deep links and
 browser Back/Forward select the appropriate section.
 The tray holds up to five buttons with live previews. Select a button's name to

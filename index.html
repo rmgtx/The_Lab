@@ -36,7 +36,7 @@
   color-scheme:dark;
 }
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5}
-.wrap{max-width:1320px;margin:0 auto;padding-block:56px 96px;
+.wrap{max-width:1320px;margin:0 auto;padding-block:12px 96px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   display:flex;flex-direction:column;gap:40px}
 @media (min-width:720px){.wrap{padding-left:max(40px,env(safe-area-inset-left,0px));padding-right:max(40px,env(safe-area-inset-right,0px))}}
@@ -52,9 +52,12 @@ header.top p{margin:12px 0 0;max-width:60ch;color:var(--muted);font-size:17px}
 .meta .row{display:flex;align-items:baseline;gap:10px}
 .meta .no{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-.palette{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
-  gap:12px 24px;padding:12px;margin:-12px;border-radius:16px;
-  background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.palette{position:fixed;z-index:40;top:calc(env(safe-area-inset-top,0px) + 72px);right:max(16px,calc((100vw - 1320px) / 2 + 40px));
+  width:min(620px,calc(100vw - 32px));max-height:calc(100vh - 96px);overflow:auto;box-sizing:border-box;
+  display:flex;flex-direction:column;gap:14px;padding:16px 18px 18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);
+  box-shadow:0 28px 60px -28px color-mix(in srgb,var(--fg) 55%,transparent)}
+.pal-head{display:flex;align-items:center;justify-content:space-between}
+.pal-title{font-weight:600;font-size:15px;letter-spacing:-.01em}
 .pal-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-width:0}
 .pal-label{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .swatches{display:flex;flex-wrap:wrap;gap:8px}
@@ -84,7 +87,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .preset .dots{display:inline-flex}
 .preset .dots i{width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 1.5px var(--surface);margin-left:-4px}
 .preset .dots i:first-child{margin-left:0}
-.pal-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;width:100%;padding-top:10px;border-top:1px solid var(--line)}
+.pal-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:10px 20px;width:100%;padding-top:10px;border-top:1px solid var(--line)}
 .jump{display:flex;flex-wrap:wrap;gap:2px}
 .jump a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}
 .jump a:hover{color:var(--fg);background:var(--surface)}
@@ -92,8 +95,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .base-opts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
 .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
 .switch input{width:16px;height:16px;margin:0;accent-color:var(--fg)}
-.group{scroll-margin-top:220px}
-@media (max-width:720px){.palette{position:static}.group{scroll-margin-top:16px}}
+.group{scroll-margin-top:76px}
+@media (max-width:650px){.palette{left:16px;right:16px;width:auto;top:calc(env(safe-area-inset-top,0px) + 64px)}}
 .offscreen *,.offscreen *::before,.offscreen *::after{animation-play-state:paused !important}
 .tap-hint{display:none;margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 @media (hover:none){.tap-hint{display:inline}}
@@ -133,6 +136,18 @@ pre{margin:0;padding:14px 20px 20px;max-height:340px;overflow:auto;font-family:v
 <link rel="stylesheet" href="workbench.css">
 
 <div class="wrap">
+  <nav class="lab-nav" aria-label="Global navigation">
+    <span class="lab-brand" aria-hidden="true">Button Lab</span>
+    <div class="lab-tabs">
+      <a href="#library" data-lab-view="library" aria-current="page">Library <span id="lab-library-count"></span></a>
+      <a href="#workbench" data-lab-view="workbench">Workbench</a>
+    </div>
+    <div class="lab-tools">
+      <label class="lab-jump" title="Jump to a section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg><span class="lab-jump-text">Sections</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg><select id="jump" aria-label="Jump to a section"></select></label>
+      <button type="button" class="lab-colors" id="colors-toggle" aria-expanded="false" aria-controls="palette-panel"><span class="lab-dots" aria-hidden="true"><i style="background:var(--cta-ink)"></i><i style="background:var(--cta-accent)"></i><i style="background:var(--cta-pop)"></i><i style="background:var(--cta-hot)"></i></span><span class="lab-colors-text">Colors</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <button type="button" class="lab-icon" id="randomize-quick" aria-label="Randomize colors" title="Randomize colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"></circle><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"></circle><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"></circle><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle></svg></button>
+    </div>
+  </nav>
   <header class="top">
     <div>
       <h1>Button Lab</h1>
@@ -140,20 +155,15 @@ pre{margin:0;padding:14px 20px 20px;max-height:340px;overflow:auto;font-family:v
     </div>
     <span class="count" id="count"></span>
   </header>
-  <nav class="lab-nav" aria-label="Global navigation">
-    <a href="#library" data-lab-view="library" aria-current="page">Button library <span id="lab-library-count"></span></a>
-    <a href="#workbench" data-lab-view="workbench">Customize &amp; Preview <span>Workbench</span></a>
-  </nav>
   <section id="workbench" class="workbench" role="main" aria-labelledby="wb-title" hidden></section>
   <section id="library" aria-label="Button library">
-  <section class="palette" aria-label="Button colors">
+  <section class="palette" id="palette-panel" aria-label="Colors and copy settings" hidden>
+    <div class="pal-head"><span class="pal-title">Colors</span><button type="button" class="lab-icon" id="panel-close" aria-label="Close colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
     <div class="pal-row">
-      <span class="pal-label">Colors</span>
       <div class="swatches" id="swatches"></div>
     </div>
     <div class="presets" id="presets"><button type="button" class="act primary dice" id="randomize" title="Shuffle every unlocked color"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"></circle><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"></circle><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"></circle><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle></svg><span>Randomize</span></button></div>
     <div class="pal-tools">
-      <nav class="jump" id="jump" aria-label="Jump to a section"></nav>
       <div class="base-opts">
         <label class="switch" for="include-base"><input type="checkbox" id="include-base"> Include shared base in copies</label>
         <button type="button" class="act" id="copy-base"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg><span>Copy shared base</span></button>
@@ -3948,7 +3958,32 @@ if ('IntersectionObserver' in window) {
 }
 
 // Jump links and shared-base controls.
-document.getElementById('jump').innerHTML = GROUPS.map(g => `<a href="#group-${g.id}">${g.title}</a>`).join('');
+const jumpSel = document.getElementById('jump');
+jumpSel.innerHTML = '<option value="">Jump to a section…</option>' + GROUPS.map(g => `<option value="group-${g.id}">${g.title}</option>`).join('');
+jumpSel.addEventListener('change', () => {
+  const id = jumpSel.value;
+  jumpSel.value = '';
+  if (!id) return;
+  location.hash = id;
+  const target = document.getElementById(id);
+  if (target) target.scrollIntoView({ block: 'start' });
+});
+const colorsBtn = document.getElementById('colors-toggle');
+const colorsPanel = document.getElementById('palette-panel');
+function setColorsPanel(open) {
+  colorsPanel.hidden = !open;
+  colorsBtn.setAttribute('aria-expanded', String(open));
+}
+colorsBtn.addEventListener('click', () => {
+  setColorsPanel(colorsPanel.hidden);
+  if (!colorsPanel.hidden) { const first = colorsPanel.querySelector('input'); if (first) first.focus({ preventScroll: true }); }
+});
+document.getElementById('panel-close').addEventListener('click', () => { setColorsPanel(false); colorsBtn.focus(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !colorsPanel.hidden) { setColorsPanel(false); colorsBtn.focus(); } });
+document.addEventListener('pointerdown', (e) => {
+  if (!colorsPanel.hidden && !colorsPanel.contains(e.target) && !colorsBtn.contains(e.target)) setColorsPanel(false);
+});
+document.getElementById('randomize-quick').addEventListener('click', () => document.getElementById('randomize').click());
 const baseToggle = document.getElementById('include-base');
 baseToggle.checked = includeBase;
 baseToggle.addEventListener('change', () => {
