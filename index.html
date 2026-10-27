@@ -140,7 +140,12 @@ pre{margin:0;padding:14px 20px 20px;max-height:340px;overflow:auto;font-family:v
     </div>
     <span class="count" id="count"></span>
   </header>
-  <section id="workbench" class="workbench" aria-labelledby="wb-title"></section>
+  <nav class="lab-nav" aria-label="Global navigation">
+    <a href="#library" data-lab-view="library" aria-current="page">Button library <span id="lab-library-count"></span></a>
+    <a href="#workbench" data-lab-view="workbench">Customize &amp; Preview <span>Workbench</span></a>
+  </nav>
+  <section id="workbench" class="workbench" role="main" aria-labelledby="wb-title" hidden></section>
+  <section id="library" aria-label="Button library">
   <section class="palette" aria-label="Button colors">
     <div class="pal-row">
       <span class="pal-label">Colors</span>
@@ -156,6 +161,7 @@ pre{margin:0;padding:14px 20px 20px;max-height:340px;overflow:auto;font-family:v
     </div>
   </section>
   <main class="groups" id="groups" aria-label="Button library"></main>
+  </section>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -4107,6 +4113,7 @@ function toast(msg){
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
 }
 </script>
+<script src="workbench-adapters.js"></script>
 <script src="workbench.js"></script>
 
 </body>

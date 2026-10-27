@@ -8,6 +8,7 @@ const React = require('react');
 const {renderToStaticMarkup} = require('react-dom/server');
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'index.html'),'utf8')
+  .replace('<script src="workbench-adapters.js"></script>', () => '<script>'+fs.readFileSync(path.join(root,'workbench-adapters.js'),'utf8')+'</script>')
   .replace('<script src="workbench.js"></script>', () => '<script>'+fs.readFileSync(path.join(root,'workbench.js'),'utf8')+'</script>');
 function fixture(t, options = {}) {
   const errors=[];
@@ -149,7 +150,7 @@ test('every card can be added; a full tray asks which button to replace and pres
   assert.equal(f.doc.querySelectorAll('[data-workbench-open]').length,91);
   f.click('[data-workbench-open="cta-sticker"]');assert.equal(f.$('#wb-replace').hidden,false);assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
   f.change('#wb-replace-choice','cta-classic');f.click('#wb-confirm-replace');
-  assert.ok(f.$('[data-specimen="cta-sticker"]'));assert.equal(f.$('#wb-label').disabled,true);assert.ok(f.$('#wb-sample iframe'));assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
+  assert.ok(f.$('[data-specimen="cta-sticker"]'));assert.equal(f.$('#wb-label').disabled,false);assert.ok(f.$('#wb-sample iframe'));assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
   f.click('[data-tray-remove="cta-sticker"]');f.click('[data-workbench-open="cta-classic"]');assert.equal(f.$('#wb-label').value,'Keep my draft');
   const fresh=fixture(t,{saved:f.dom.window.localStorage.getItem(storageKey)});assert.equal(fresh.doc.querySelectorAll('.wb-tray-item').length,5);assert.equal(fresh.$('#wb-label').value,'Keep my draft');
 });
@@ -185,4 +186,70 @@ test('loading a favorite outside a full tray waits for an explicit replacement',
   f.click('[data-favorite-load]');assert.equal(f.$('#wb-replace').hidden,false);assert.equal(f.$('[data-specimen="cta-classic"]'),null);
   f.click('#wb-cancel-replace');assert.equal(f.$('[data-specimen="cta-classic"]'),null);
   f.click('[data-favorite-load]');f.click('#wb-confirm-replace');assert.equal(f.$('#wb-label').value,'Favorite snapshot');assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
+});
+
+test('global navigation separates the library and workbench, including deep links and history', t => {
+  const f = fixture(t);
+  assert.equal(f.$('#workbench').hidden, true); assert.equal(f.$('#library').hidden, false);
+  f.click('[data-lab-view=workbench]');
+  assert.equal(f.$('#library').hidden, true); assert.equal(f.$('#workbench').hidden, false);
+  assert.equal(f.$('[data-lab-view=workbench]').getAttribute('aria-current'), 'page');
+  for (const hash of ['#group-dot','#cta-sticker','#workbench','#wb-favorites-title','#library']) {
+    f.dom.window.history.replaceState(null,'',hash); f.dom.window.dispatchEvent(new f.dom.window.HashChangeEvent('hashchange'));
+    assert.equal(f.$('#library').hidden, hash === '#workbench' || hash.startsWith('#wb-'));
+  }
+  f.click('[data-workbench-open="cta-sticker"]'); assert.equal(f.$('#library').hidden,true); assert.equal(f.$('#wb-replace').hidden,false);
+});
+
+test('all 91 customized designs retain text, effects, state controls and runnable exports', async t => {
+  const f = fixture(t), errors = [];
+  const label = 'RIP < & {go}';
+  for (const link of [...f.doc.querySelectorAll('[data-workbench-open]')]) {
+    link.click(); if (!f.$('#wb-replace').hidden) f.click('#wb-confirm-replace');
+    for (const [key,value] of Object.entries({label,size:'large',radius:'soft',icon:'plus',motion:'relaxed'})) {
+      assert.equal(f.$('#wb-'+key).disabled,false,link.dataset.workbenchOpen); f.change('#wb-'+key,value);
+    }
+    f.change('[data-color=accent]','#aabbcc');
+    const html = await f.copy('html');
+    assert.ok(html.includes('#aabbcc')); assert.ok(!html.includes('data-preview='));
+    const vc = new VirtualConsole(); vc.on('jsdomError', e=>{if(e.type !== 'css-parsing') errors.push(`${link.dataset.workbenchOpen}: ${e.message}`);});
+    const standalone = new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.matchMedia=()=>({matches:false});}});
+    const button = standalone.window.document.querySelector('button');
+    assert.ok(button.getAttribute('aria-label')?.includes(label) || button.textContent.includes(label),link.dataset.workbenchOpen);
+    assert.equal(button.querySelector('script'),null);
+    assert.ok(button.querySelector('.wb-icon-art,.wb-custom-icon,.wb-extra-icon'),link.dataset.workbenchOpen);
+    if (link.dataset.workbenchOpen === 'cta-cart') {
+      button.click(); const fly = button.querySelector('.fly'); fly.dispatchEvent(new standalone.window.Event('animationend'));
+      assert.equal(button.querySelector('.count').textContent,'1'); assert.ok(button.getAttribute('aria-label').startsWith(label));
+    }
+    if (link.dataset.workbenchOpen === 'cta-terminal') assert.equal(button.querySelector('.ghost').textContent,label);
+    if (link.dataset.workbenchOpen === 'cta-letters') assert.equal(button.querySelector('.word').textContent,label.replaceAll(' ','\u00a0'));
+    if (link.dataset.workbenchOpen === 'cta-ransom') assert.equal(button.querySelector('.word').textContent,label.replaceAll(' ','\u00a0'));
+    if (link.dataset.workbenchOpen === 'cta-burger') {button.click();assert.equal(button.getAttribute('aria-expanded'),'true');}
+    standalone.window.close();
+    const code = await f.copy('react');
+    const compiled = transformSync(code,{loader:'jsx',format:'cjs'}).code;
+    const mod = {exports:{}}; new Function('require','module','exports',compiled)(require,mod,mod.exports);
+    const rendered = renderToStaticMarkup(React.createElement(mod.exports.default,{loading:true}));
+    const reactDoc = new JSDOM(rendered).window;
+    assert.equal(reactDoc.document.querySelector('button').disabled,true,link.dataset.workbenchOpen);
+    assert.equal(reactDoc.document.querySelector('button').dataset.status,'loading'); reactDoc.close();
+    f.click('[data-state=loading]');
+    const iframe = f.$('#wb-sample iframe');
+    if (iframe) {
+      const preview = new JSDOM(iframe.srcdoc,{runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.matchMedia=()=>({matches:false});}});
+      assert.equal(preview.window.document.querySelector('button').disabled,true);assert.equal(preview.window.document.querySelector('button').dataset.status,'loading');preview.window.close();
+    }
+  }
+  assert.deepEqual(errors,[]);
+});
+
+test('slower motion changes time values without rewriting design class names ending in s', async t => {
+  const f=fixture(t);
+  f.click('[data-workbench-open="cta-letter-cascade"]');f.click('#wb-confirm-replace');
+  f.change('#wb-label','Build with RIPSlop');f.change('#wb-icon','plus');f.change('#wb-motion','relaxed');f.change('#wb-radius','soft');
+  const html=await f.copy('html'), doc=new JSDOM(html).window;
+  const cls=doc.document.querySelector('button').className;
+  assert.match(cls,/\ds$/);assert.ok(html.includes(`.${cls} .word { display: flex; }`));
+  assert.ok(html.includes('transition-delay: 32.4ms'));doc.close();
 });

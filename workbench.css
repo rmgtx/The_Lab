@@ -95,3 +95,17 @@
 
 .wb-head-links{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 #wb-favorites-title{scroll-margin-top:24px}
+
+/* Separate destinations share one global navigation. */
+[hidden]{display:none !important}
+.lab-nav{display:flex;gap:6px;padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:0 0 24px}
+.lab-nav a{display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:9px;color:var(--muted);text-decoration:none;font:600 14px var(--sans)}
+.lab-nav a span{font:10px var(--mono);opacity:.65}
+.lab-nav a[aria-current=page]{background:var(--fg);color:var(--bg)}
+.lab-nav a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#library,#groups{scroll-margin-top:24px}
+@media(max-width:650px){.lab-nav{gap:4px}.lab-nav a{flex:1;padding:12px;justify-content:center;text-align:center;font-size:12px}.lab-nav a span{display:none}}
+.lab-nav{position:sticky;top:12px;z-index:20}
+.workbench{scroll-margin-top:92px}
+#library .palette{top:82px}
+@media(max-width:650px){.lab-nav{top:6px}.workbench{scroll-margin-top:76px}}

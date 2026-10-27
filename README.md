@@ -58,16 +58,21 @@ python3 -m http.server
 
 ### Customize & Preview workbench
 
-Select **Add to workbench** on any library card to put it in the comparison tray.
+Open **Customize & Preview** in the global navigation for the dedicated workbench.
+The **Button library** tab contains the gallery and its palette. Select **Add to
+workbench** on any library card to open it in the comparison tray. Deep links and
+browser Back/Forward select the appropriate section.
 The tray holds up to five buttons with live previews. Select a button's name to
 edit it; use its × to remove it. If the tray is full, choose which button to
 replace. Removed buttons keep their saved edits for when you add them again.
 
-- All 91 buttons can be compared, recolored, saved as favorites, and exported with
-  their original effects. Complex effects preserve their text, geometry, and
-  JavaScript behavior; unavailable controls are disabled and explained.
-- Classic Dot, Hard Press, Shine Sweep, Corner Trace, and Deck Stack additionally
-  support label, size, corners, icon, slower motion, and loading/success controls.
+- All 91 buttons support label, size, corners, icon, palette, slower/no motion,
+  and loading/success previews. Animated letters, repeated text, circular SVG text,
+  reflections, and JavaScript effects retain their structure. Icon-only controls
+  get an editable caption. Alternate action messages (e.g. “Order placed”) retain
+  their original wording.
+- Size scales complex compositions proportionally, preserving their geometry.
+  Preview frames fit wide designs to the available space; exported sizes are exact.
 - Drafts, the comparison tray, selected button, and preview settings save
   automatically and survive reloads. Storage is local to this browser and address
   (including the port); it is not synced across devices. Storage failures show a
@@ -84,14 +89,15 @@ replace. Removed buttons keep their saved edits for when you add them again.
   base checkbox. Each design has a scoped class so customized exports can coexist.
 - Exports start at rest; pinned preview states and the canvas background are omitted.
   Loading and success previews are simulations, controlled by the consuming app.
-- Fully editable React exports accept `children`, `onClick`, `type`, `disabled`,
-  `loading`, and `success`, plus other native button props. Their HTML exports
-  use native `disabled` and `data-status="loading"` / `data-status="success"`.
-  Other React exports retain the registry's original setup/cleanup behavior and
-  forward native button props. They do not add loading/success props.
+- React exports forward native button props and accept `disabled`, `loading`, and
+  `success`. The original five also accept `children`; other effects embed the
+  workbench label to preserve animated markup. Effect setup/cleanup remains intact.
+  HTML exports use native `disabled` and `data-status="loading"` / `data-status="success"`.
 
-The workbench lives in `workbench.js` and `workbench.css`, and reads the existing
-button registry. Keep these files beside `index.html` when sharing the Lab.
+The workbench lives in `workbench.js`, `workbench-adapters.js`, and `workbench.css`,
+and reads the existing button registry. Keep these files beside `index.html` when
+sharing the Lab. Adapters preserve required effect nodes when changing icons and
+use local clocks for slower JavaScript motion without changing browser globals.
 
 ### Copy from the full library
 

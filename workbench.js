@@ -3,14 +3,10 @@
   'use strict';
   const host = document.getElementById('workbench');
   const specimens = BUTTONS;
-  const editable = new Set(['cta-classic', 'cta-hard-press', 'cta-shine-sweep', 'cta-corner-trace', 'cta-deck']);
-  let tray = [...editable], pendingAdd = null;
-  const defaults = specimens.map(b => {
-    const tpl = document.createElement('template'); tpl.innerHTML = b.html;
-    const button = tpl.content.querySelector('button');
-    button.querySelectorAll('[aria-hidden="true"]').forEach(el => el.remove());
-    return (button.getAttribute('aria-label') || button.textContent.trim() || b.name).slice(0,64);
-  });
+  document.getElementById('lab-library-count').textContent = specimens.length;
+  const simpleSpecimens = new Set(['cta-classic', 'cta-hard-press', 'cta-shine-sweep', 'cta-corner-trace', 'cta-deck']);
+  let tray = [...simpleSpecimens], pendingAdd = null;
+  const defaults = specimens.map(WorkbenchAdapters.labelFor);
   const STORAGE_KEY = 'button-lab-workbench-v1';
   const FAVORITE_LIMIT = 24;
   const drafts = new Map();
@@ -102,8 +98,11 @@
     frame.title = `${findSpecimen(design.specimen)?.name || 'Button'} ${compact ? 'comparison' : 'interactive preview'}`;
     frame.setAttribute('sandbox','allow-scripts');
     const css = design.css.replaceAll(':is(:hover, :focus-visible)', ':is(:hover, :focus-visible, [data-preview="hover"], [data-preview="focus"], [data-preview="pressed"])').replaceAll(':active', ':is(:active, [data-preview="pressed"])');
-    const script = `${design.setup}\nconst target = document.querySelector('.${design.cls}');\n${design.init ? `${design.init}(target);` : ''}\ntarget.dataset.preview = ${JSON.stringify(pinned)};\nif (${JSON.stringify(pinned)} === 'disabled') target.disabled = true;\nif (${JSON.stringify(pinned)} === 'focus') target.focus();\ntarget.addEventListener('pointerup', e => {if(e.pointerType !== 'mouse'){target.classList.add('is-active');setTimeout(()=>target.classList.remove('is-active'),2000);}});`;
-    frame.srcdoc = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;height:100%;background:${d.colors.stage};color:${d.colors.ink};font:15px/1.5 system-ui,sans-serif}body{display:grid;place-items:center;overflow:hidden}.frame-stage{display:grid;place-items:center;width:100%;box-sizing:border-box;padding:32px;${compact ? 'transform:scale(.7);width:142%;' : ''}}${css}</style><body><div class="frame-stage">${design.html}</div><script>${script.replace(/<\/script/gi,'<\\/script')}<\/script></body></html>`;
+    const script = `${design.setup}\nconst target = document.querySelector('.${design.cls}');\n${design.init ? `${design.init}(target);` : ''}\ntarget.dataset.preview = ${JSON.stringify(pinned)};\nif (['disabled','loading'].includes(${JSON.stringify(pinned)})) target.disabled = true;\nif (['loading','success'].includes(${JSON.stringify(pinned)})) target.dataset.status = ${JSON.stringify(pinned)};\nif (${JSON.stringify(pinned)} === 'loading') target.setAttribute('aria-busy','true');\nif (${JSON.stringify(pinned)} === 'focus') target.focus();\ntarget.addEventListener('pointerup', e => {if(e.pointerType !== 'mouse'){target.classList.add('is-active');setTimeout(()=>target.classList.remove('is-active'),2000);}});`;
+    const fit = `const content = document.querySelector('.frame-content');
+const fitPreview = () => { content.style.setProperty('--fit', Math.min(${compact ? .7 : 1}, (innerWidth - 32) / Math.max(1,content.offsetWidth), (innerHeight - 24) / Math.max(1,content.offsetHeight))); };
+if (typeof ResizeObserver !== 'undefined') { new ResizeObserver(fitPreview).observe(content); window.addEventListener('resize',fitPreview); fitPreview(); }`;
+    frame.srcdoc = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;height:100%;background:${d.colors.stage};color:${d.colors.ink};font:15px/1.5 system-ui,sans-serif}body{display:grid;place-items:center;overflow:hidden}.frame-stage{position:absolute;inset:0}.frame-content{position:absolute;top:50%;left:50%;width:max-content;transform:translate(-50%,-50%) scale(var(--fit,1));transform-origin:center}${css}</style><body><div class="frame-stage"><div class="frame-content">${design.html}</div></div><script>${(script+fit).replace(/<\/script/gi,'<\\/script')}<\/script></body></html>`;
     return frame;
   }
   function renderTray() {
@@ -150,6 +149,7 @@
     $('#wb-title').focus({preventScroll:true}); host.scrollIntoView({block:'start'});
   }
   function requestAdd(cls, favorite = null) {
+    showView('workbench');
     if (tray.includes(cls) || tray.length < 5) { activateAdded(cls,favorite); return; }
     pendingAdd = {cls,favorite};
     $('#wb-replace-message').textContent = `Your workbench has five buttons. Choose one to replace with ${findSpecimen(cls).name}. Its edits and favorites will stay saved.`;
@@ -233,18 +233,18 @@
     let css = b.css.replaceAll(b.cls, cls)
       .replaceAll(':is(:hover, :focus-visible, .is-active)', ':not(:disabled):is(:hover, :focus-visible)')
       .replaceAll(':active', ':not(:disabled):active');
-    if (d.motion === 'relaxed') css = css.replace(/(\d*\.?\d+)s\b/g, (_, n) => `${+(Number(n)*1.8).toFixed(3)}s`);
+    if (d.motion === 'relaxed') css = css.replace(/(?<=[\s:,])(-?\d*\.?\d+)(ms|s)\b/g, (_, n, unit) => `${+(Number(n)*1.8).toFixed(3)}${unit}`);
     const vars = ['ink','paper','accent','pop','hot'].map(k=>`  --cta-${k}: ${d.colors[k]};`).join('\n');
-    if (!editable.has(b.cls)) {
+    if (!simpleSpecimens.has(b.cls)) {
       const tpl = document.createElement('template'); tpl.innerHTML = b.html.replaceAll(b.cls, cls);
       tpl.content.querySelector('button').classList.remove('cta');
+      const customCSS = WorkbenchAdapters.customize(tpl,b,d,cls);
+      if (d.motion === 'relaxed') tpl.content.querySelectorAll('[style]').forEach(el => el.setAttribute('style',el.getAttribute('style').replace(/(\d*\.?\d+)(ms|s)\b/g, (_,n,unit) => Number(n)*1.8+unit)));
       const html = `<span class="${cls}-root">${tpl.innerHTML}</span>`;
-      const off = d.motion === 'none' ? `.${cls}-root, .${cls}-root *, .${cls}-root *::before, .${cls}-root *::after {animation:none !important;transition:none !important;}` : '';
-      const cssOutput = `${scopedBase(cls)}\n.${cls}-root {display:inline-block;max-width:100%;--out:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);${vars}}\n${css}\n.${cls}:disabled {opacity:.45;pointer-events:none;}\n${off}\n@media(prefers-reduced-motion:reduce){.${cls}-root, .${cls}-root *, .${cls}-root *::before, .${cls}-root *::after {animation:none !important;transition:none !important;}}`;
-      let setup = b.setup ? b.setup.toString().replaceAll(b.cls, cls) : '';
-      if (d.motion === 'none') setup = setup.replaceAll("matchMedia('(prefers-reduced-motion: reduce)').matches", 'true');
-      if (setup.includes('makeSpring')) setup = makeSpring.toString() + '\n' + setup;
-      return {css:cssOutput, html, cls, setup, init:b.setup?.name, specimen:b.cls};
+      const off = d.motion === 'none' ? `.${cls}-root, .${cls}-root *, .${cls}-root *::before, .${cls}-root *::after {animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important;}` : '';
+      const cssOutput = `${scopedBase(cls)}\n.${cls}-root {display:inline-block;max-width:100%;--out:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);${vars}}\n${css}\n${customCSS}\n${off}\n@media(prefers-reduced-motion:reduce){.${cls}-root, .${cls}-root *, .${cls}-root *::before, .${cls}-root *::after {animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important;}}`;
+      const setup = WorkbenchAdapters.setupFor(b,d,cls,makeSpring);
+      return {css:cssOutput, html, cls, setup, init:setup ? 'setupWorkbench' : '', specimen:b.cls};
     }
     const originalHeight = b.css.match(/height:\s*(\d+)px/)[1];
     const size = {compact:'min-height:40px;height:auto;padding:10px 16px;font-size:14px;',comfortable:'min-height:52px;height:auto;padding:14px 24px;font-size:16px;',large:'min-height:64px;height:auto;padding:18px 30px;font-size:18px;'}[d.size] || `height:auto;min-height:${originalHeight}px;padding-top:8px;padding-bottom:8px;`;
@@ -288,13 +288,13 @@
     return `<${node.localName}${attrs}>${[...node.childNodes].map(jsx).join('')}</${node.localName}>`;
   }
   function exportCode(kind) {
-    if (!editable.has(selected.cls)) {
-      if (kind === 'html') return `<style>\n${currentCSS}\n</style>\n${currentHTML}${currentSetup ? `\n<script>\n${currentSetup}\ndocument.querySelectorAll('.${currentClass}').forEach(${selected.setup.name});\n<\/script>` : ''}`;
+    if (!simpleSpecimens.has(selected.cls)) {
+      if (kind === 'html') return `<style>\n${currentCSS}\n</style>\n${currentHTML}${currentSetup ? `\n<script>\n${currentSetup}\ndocument.querySelectorAll('.${currentClass}').forEach(setupWorkbench);\n<\/script>` : ''}`;
       const tpl = document.createElement('template'); tpl.innerHTML = currentHTML;
       let markup = jsx(tpl.content.firstElementChild);
-      markup = markup.replace(`className={"${currentClass}"}`, `{...props} ref={ref} className={"${currentClass}"}`);
+      markup = markup.replace(`className={"${currentClass}"}`, `{...props} ref={ref} disabled={disabled || loading} aria-busy={loading || undefined} data-status={loading ? "loading" : success ? "success" : undefined} className={"${currentClass}"}`);
       const name = selected.name.replace(/[^A-Za-z0-9]/g,'') + 'Button';
-      return `import React, {useEffect, useRef} from "react";\nconst css = ${JSON.stringify(currentCSS)};\n${currentSetup}\nexport default function ${name}(props) {\n  const ref = useRef(null);\n  useEffect(() => { ${currentSetup ? `return ${selected.setup.name}(ref.current);` : ''} }, []);\n  return <><style>{css}</style>${markup}</>;\n}\n`;
+      return `import React, {useEffect, useRef} from "react";\nconst css = ${JSON.stringify(currentCSS)};\n${currentSetup}\nexport default function ${name}({disabled = false, loading = false, success = false, ...props}) {\n  const ref = useRef(null);\n  useEffect(() => { ${currentSetup ? `return setupWorkbench(ref.current);` : ''} }, []);\n  return <><style>{css}</style>${markup}</>;\n}\n`;
     }
     if(kind === 'html') return `<!-- Connect your action to this button.\nFor async actions: disable it and set data-status="loading" while waiting;\nset data-status="success" only after the action succeeds. -->\n<style>\n${currentCSS}\n</style>\n\n${currentHTML}`;
     const tpl=document.createElement('template'); tpl.innerHTML=currentHTML;
@@ -319,7 +319,7 @@
     for(const key of ['stage','ink','paper']) $('.wb-stage').style.setProperty('--wb-'+key, colors[key]);
     sample.className='wb-sample' + (context === 'card' ? ' wb-context-card' : '');
     sample.innerHTML=context === 'card' ? '<small>Your next project</small><h3>A little detail.<br>A different feeling.</h3><p>Try your button alongside real content. See how its color, shape and movement fit.</p>'+currentHTML : currentHTML;
-    if (!editable.has(selected.cls)) {
+    if (!simpleSpecimens.has(selected.cls)) {
       const frame = makeFrame(design, draft(), false, state);
       sample.querySelector(`.${design.cls}-root`).replaceWith(frame);
     }
@@ -338,13 +338,7 @@
   }
   function syncControls() {
     const d=draft();
-    const full = editable.has(selected.cls);
-    for (const key of ['label','size','radius','icon']) $('#wb-'+key).disabled = !full;
-    $('#wb-motion').querySelector('[value=relaxed]').disabled = !full;
-    if (!full && d.motion === 'relaxed') d.motion = 'original';
-    if (!full && ['loading','success'].includes(state)) state = 'idle';
-    host.querySelectorAll('[data-state=loading],[data-state=success]').forEach(b => b.disabled = !full);
-    $('#wb-capabilities').textContent = full ? 'Customize every detail below.' : 'This effect supports colors and motion on/off. Its original text, shape and click behavior stay intact; try it directly in the preview.';
+    $('#wb-capabilities').textContent = 'Customize every detail. Alternate action messages keep their original wording.';
     for(const key of ['label','size','radius','icon','motion']) $('#wb-'+key).value=d[key];
     $('#wb-context').value=context;
     host.querySelectorAll('[data-color]').forEach(input=>input.value=d.colors[input.dataset.color]);
@@ -390,5 +384,25 @@
     const open = document.createElement('a'); open.href = '#workbench'; open.className = 'act wb-open'; open.textContent = 'Add to workbench'; open.dataset.workbenchOpen = b.cls;
     open.addEventListener('click', () => requestAdd(b.cls)); actions.append(open);
   }
+  function showView(view) {
+    const workbench = view === 'workbench';
+    host.hidden = !workbench;
+    document.getElementById('library').hidden = workbench;
+    document.querySelectorAll('[data-lab-view]').forEach(link => {
+      if (link.dataset.labView === view) link.setAttribute('aria-current','page');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function route() {
+    showView(location.hash === '#workbench' || location.hash.startsWith('#wb-') ? 'workbench' : 'library');
+  }
+  document.addEventListener('click', e => {
+    const link = e.target.closest('a[href^="#"]');
+    if (!link || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const hash = link.getAttribute('href');
+    showView(hash === '#workbench' || hash.startsWith('#wb-') ? 'workbench' : 'library');
+  });
+  window.addEventListener('hashchange', route);
+  route();
   showStorageMessage(); renderFavorites(); syncControls(); ready = true;
 })();
