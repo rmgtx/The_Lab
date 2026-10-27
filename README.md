@@ -58,21 +58,37 @@ python3 -m http.server
 
 ### Customize & Preview workbench
 
-The workbench above the library starts with five buttons: Classic Dot, Hard Press,
-Shine Sweep, Corner Trace, and Deck Stack. Change the label, size, corners, icon,
-motion speed, and local palette, then preview the result on a canvas or inside a card.
+Select **Add to workbench** on any library card to put it in the comparison tray.
+The tray holds up to five buttons with live previews. Select a button's name to
+edit it; use its × to remove it. If the tray is full, choose which button to
+replace. Removed buttons keep their saved edits for when you add them again.
 
-- Pin idle, hover, pressed, focus, disabled, loading, or success states. Loading and
-  success are simulations; the consuming application controls the real action.
-- Each specimen keeps its edits while the page stays open. Reloading clears these
-  drafts. **Reset this specimen** resets only the selected button and takes the
-  current library palette. **Use library colors** updates just its colors.
+- All 91 buttons can be compared, recolored, saved as favorites, and exported with
+  their original effects. Complex effects preserve their text, geometry, and
+  JavaScript behavior; unavailable controls are disabled and explained.
+- Classic Dot, Hard Press, Shine Sweep, Corner Trace, and Deck Stack additionally
+  support label, size, corners, icon, slower motion, and loading/success controls.
+- Drafts, the comparison tray, selected button, and preview settings save
+  automatically and survive reloads. Storage is local to this browser and address
+  (including the port); it is not synced across devices. Storage failures show a
+  visible notice, and malformed saved values are sanitized.
+- Give a version a name under **RIPSlop favorites** and select **Save as favorite**.
+  Up to 24 snapshots can be saved, including several versions of one button.
+  Loading a favorite copies it into the editor; later edits do not change the
+  saved snapshot. Save again to keep another version. Remove has an Undo action
+  until the page reloads or you remove another favorite.
+- **Reset this specimen** resets only the selected draft and takes the current
+  library palette. Favorites remain intact. **Use library colors** updates just
+  the draft's colors.
 - Workbench copies always include their CSS, independently of the gallery's shared
   base checkbox. Each design has a scoped class so customized exports can coexist.
 - Exports start at rest; pinned preview states and the canvas background are omitted.
-- React exports accept `children`, `onClick`, `type`, `disabled`, `loading`, and
-  `success`, plus other native button props. HTML exports use native `disabled`
-  and `data-status="loading"` / `data-status="success"` for application-driven states.
+  Loading and success previews are simulations, controlled by the consuming app.
+- Fully editable React exports accept `children`, `onClick`, `type`, `disabled`,
+  `loading`, and `success`, plus other native button props. Their HTML exports
+  use native `disabled` and `data-status="loading"` / `data-status="success"`.
+  Other React exports retain the registry's original setup/cleanup behavior and
+  forward native button props. They do not add loading/success props.
 
 The workbench lives in `workbench.js` and `workbench.css`, and reads the existing
 button registry. Keep these files beside `index.html` when sharing the Lab.
@@ -125,8 +141,9 @@ npm test
 ```
 
 Use a current Node LTS release (Node 24.15 or newer in the 24.x line).
-Checks cover state semantics, draft isolation, scoped/escaped HTML, React props,
-icon changes, reduced-motion CSS, and clipboard fallback. Browser checks should
+Checks cover reload persistence, immutable favorites, tray capacity and replacement,
+storage failures, state semantics, scoped/escaped HTML, React props, and clipboard
+fallback. Every registry entry is compiled as React and initialized as standalone HTML. Browser checks should
 also cover keyboard focus and narrow layouts; DOM tests do not verify layout.
 
 ## License

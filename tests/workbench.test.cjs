@@ -9,13 +9,16 @@ const {renderToStaticMarkup} = require('react-dom/server');
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'index.html'),'utf8')
   .replace('<script src="workbench.js"></script>', () => '<script>'+fs.readFileSync(path.join(root,'workbench.js'),'utf8')+'</script>');
-function fixture(t) {
+function fixture(t, options = {}) {
   const errors=[];
   const vc=new VirtualConsole();
   vc.on('jsdomError', e=>{if(e.type !== 'css-parsing') errors.push(e.message);});
   let copied='';
   const dom=new JSDOM(source, {url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){
     w.matchMedia=()=>({matches:true});
+    w.HTMLElement.prototype.scrollIntoView=()=>{};
+    if (options.saved !== undefined) w.localStorage.setItem('button-lab-workbench-v1',options.saved);
+    if (options.blockStorage) w.Storage.prototype.setItem=()=>{throw new w.DOMException('Full','QuotaExceededError');};
     Object.defineProperty(w.navigator,'clipboard',{value:{writeText:async text=>{copied=text;}},configurable:true});
   }});
   t.after(()=>dom.window.close());
@@ -25,7 +28,7 @@ function fixture(t) {
   const change=(s,value)=>{const el=$(s);el.value=value;el.dispatchEvent(new dom.window.Event(el.type === 'text'||el.type === 'color'?'input':'change',{bubbles:true}));};
   const copy=async kind=>{click('#wb-copy-'+kind);await Promise.resolve();return copied;};
   assert.deepEqual(errors,[]);
-  return {dom,doc,$,click,change,copy};
+  return {dom,doc,$,click,change,copy,errors};
 }
 const specimens=['classic','hard-press','shine-sweep','corner-trace','deck'];
 test('all five specimens support preview states, with native disabled and busy semantics',t=>{
@@ -120,4 +123,66 @@ test('blocked clipboard opens and selects the requested export',async t=>{
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal($('.wb-code').open,true);
   assert.ok(dom.window.getSelection().toString().startsWith('import React'));
+});
+const storageKey='button-lab-workbench-v1';
+test('drafts, selected button, tray and preview settings survive a reload',t=>{
+  const f=fixture(t);f.change('#wb-label','RIPSlop launch');f.change('#wb-size','large');f.change('[data-color="accent"]','#112233');f.change('#wb-context','card');
+  f.click('[data-specimen="cta-deck"]');f.change('#wb-label','Second design');f.click('[data-state="pressed"]');
+  const fresh=fixture(t,{saved:f.dom.window.localStorage.getItem(storageKey)});
+  assert.equal(fresh.$('#wb-label').value,'Second design');assert.equal(fresh.$('#wb-context').value,'card');assert.equal(fresh.$('[data-state="pressed"]').getAttribute('aria-pressed'),'true');
+  fresh.click('[data-specimen="cta-classic"]');assert.equal(fresh.$('#wb-label').value,'RIPSlop launch');assert.equal(fresh.$('#wb-size').value,'large');assert.equal(fresh.$('[data-color="accent"]').value,'#112233');
+});
+test('favorites are independent snapshots, restored after reload, with remove and undo',async t=>{
+  const f=fixture(t);f.change('#wb-label','Original version');f.change('#wb-context','card');
+  const original=await f.copy('html');
+  f.change('#wb-favorite-name','RIPSlop <img src=x>');f.click('#wb-save-favorite button');
+  assert.equal(f.$('#wb-favorite-list img'),null);
+  f.change('#wb-label','Changed later');
+  const fresh=fixture(t,{saved:f.dom.window.localStorage.getItem(storageKey)});
+  fresh.click('[data-favorite-load]');assert.equal(fresh.$('#wb-label').value,'Original version');assert.equal(await fresh.copy('html'),original);
+  fresh.change('#wb-label','Another edit');fresh.click('[data-favorite-load]');assert.equal(fresh.$('#wb-label').value,'Original version');
+  fresh.click('[data-favorite-remove]');assert.equal(fresh.$('[data-favorite-load]'),null);assert.deepEqual(JSON.parse(fresh.dom.window.localStorage.getItem(storageKey)).favorites,[]);
+  fresh.click('#wb-undo-remove');assert.ok(fresh.$('[data-favorite-load]'));assert.equal(JSON.parse(fresh.dom.window.localStorage.getItem(storageKey)).favorites.length,1);
+});
+test('every card can be added; a full tray asks which button to replace and preserves its edits',t=>{
+  const f=fixture(t);f.change('#wb-label','Keep my draft');
+  assert.equal(f.doc.querySelectorAll('[data-workbench-open]').length,91);
+  f.click('[data-workbench-open="cta-sticker"]');assert.equal(f.$('#wb-replace').hidden,false);assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
+  f.change('#wb-replace-choice','cta-classic');f.click('#wb-confirm-replace');
+  assert.ok(f.$('[data-specimen="cta-sticker"]'));assert.equal(f.$('#wb-label').disabled,true);assert.ok(f.$('#wb-sample iframe'));assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
+  f.click('[data-tray-remove="cta-sticker"]');f.click('[data-workbench-open="cta-classic"]');assert.equal(f.$('#wb-label').value,'Keep my draft');
+  const fresh=fixture(t,{saved:f.dom.window.localStorage.getItem(storageKey)});assert.equal(fresh.doc.querySelectorAll('.wb-tray-item').length,5);assert.equal(fresh.$('#wb-label').value,'Keep my draft');
+});
+test('empty trays survive reload and can accept a favorite or a new library button',t=>{
+  const f=fixture(t);for(const el of [...f.doc.querySelectorAll('[data-tray-remove]')]) el.click();
+  assert.equal(f.$('.wb-body').hidden,true);assert.equal(f.$('#wb-save-favorite button').disabled,true);
+  const fresh=fixture(t,{saved:f.dom.window.localStorage.getItem(storageKey)});assert.equal(fresh.$('#wb-empty').hidden,false);
+  fresh.click('[data-workbench-open="cta-confetti"]');assert.equal(fresh.$('.wb-body').hidden,false);assert.equal(fresh.doc.querySelectorAll('.wb-tray-item').length,1);
+});
+test('invalid saved values are sanitized and unavailable storage is reported without breaking editing',t=>{
+  const saved=JSON.stringify({version:1,selected:'bad',tray:['bad','cta-classic','cta-classic'],drafts:{'cta-classic':{size:'huge',colors:{ink:'red;display:none'},label:'A'.repeat(100)}},favorites:[null,{id:'x',specimen:'bad',name:'bad'}]});
+  const f=fixture(t,{saved});assert.equal(f.$('#wb-label').value.length,64);assert.equal(f.$('#wb-size').value,'original');assert.equal(f.$('[data-color="ink"]').value,'#0a0a0a');assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,1);
+  const broken=fixture(t,{saved:'{bad json'});assert.ok(broken.$('#wb-storage-note').textContent.includes('could not be read'));
+  const full=fixture(t,{blockStorage:true});full.change('#wb-label','Still editable');assert.ok(full.$('#wb-storage-note').textContent.includes('unavailable or full'));assert.equal(full.$('#wb-sample .wb-label').textContent,'Still editable');
+});
+test('all 91 registry buttons export compilable React and runnable standalone HTML',async t=>{
+  const f=fixture(t);
+  for(const link of [...f.doc.querySelectorAll('[data-workbench-open]')]){
+    link.click();if(!f.$('#wb-replace').hidden) f.click('#wb-confirm-replace');
+    const code=await f.copy('react');
+    const compiled=transformSync(code,{loader:'jsx',format:'cjs'}).code;
+    const module={exports:{}};new Function('require','module','exports',compiled)(require,module,module.exports);
+    assert.ok(renderToStaticMarkup(React.createElement(module.exports.default)).includes('<button'),link.dataset.workbenchOpen);
+    const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>{if(e.type!=='css-parsing')errors.push(e.message);});
+    const out=new JSDOM(await f.copy('html'),{runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.matchMedia=()=>({matches:false});}});
+    assert.deepEqual(errors,[],link.dataset.workbenchOpen);out.window.close();
+  }
+  assert.deepEqual(f.errors,[]);
+});
+test('loading a favorite outside a full tray waits for an explicit replacement',t=>{
+  const f=fixture(t);f.change('#wb-label','Favorite snapshot');f.change('#wb-favorite-name','Primary');f.click('#wb-save-favorite button');
+  f.click('[data-workbench-open="cta-sticker"]');f.change('#wb-replace-choice','cta-classic');f.click('#wb-confirm-replace');
+  f.click('[data-favorite-load]');assert.equal(f.$('#wb-replace').hidden,false);assert.equal(f.$('[data-specimen="cta-classic"]'),null);
+  f.click('#wb-cancel-replace');assert.equal(f.$('[data-specimen="cta-classic"]'),null);
+  f.click('[data-favorite-load]');f.click('#wb-confirm-replace');assert.equal(f.$('#wb-label').value,'Favorite snapshot');assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
 });
