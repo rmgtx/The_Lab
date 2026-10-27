@@ -1631,7 +1631,7 @@ const BUTTONS = [
 
 /* ---------------- Neu Follow family ---------------- */
 {
-  group:'neu', no:'11', name:'Lift Off', cls:'cta-neu-follow', stage:'var(--cta-hot)', setup: setupNeuFollow,
+  group:'neu', no:'11', name:'Lift Off', cls:'cta-neu-follow', setup: setupNeuFollow,
   note:'The face lifts out of its black well toward the pointer and drops back in when pressed.',
   css:`.cta-neu-follow-well { display: block; width: 288px; max-width: 100%; height: 80px; background: var(--cta-ink); }
 .cta-neu-follow { width: 100%; height: 100%; justify-content: space-between; padding: 0 32px; background: var(--cta-paper); color: var(--cta-ink);
@@ -1737,7 +1737,7 @@ const BUTTONS = [
 
 /* ---------------- Wet Paint family ---------------- */
 {
-  group:'wet', no:'16', name:'Fresh Paint', cls:'cta-wet-paint', stage:'var(--cta-ink)',
+  group:'wet', no:'16', name:'Fresh Paint', cls:'cta-wet-paint',
   note:'Four drips stretch and let go of a drop on staggered, looping timers.',
   css:`.cta-wet-paint { --c: var(--cta-accent); padding: 10px 16px; border-radius: 4px; background: var(--c); color: var(--cta-paper); font-weight: 600;
   transition: background-color .15s; }
@@ -1876,7 +1876,7 @@ const BUTTONS = [
 
 /* ---------------- Marquee family ---------------- */
 {
-  group:'marquee', no:'21', name:'Endless Marquee', cls:'cta-marquee', stage:'var(--cta-accent)',
+  group:'marquee', no:'21', name:'Endless Marquee', cls:'cta-marquee',
   note:'The label scrolls endlessly inside the pill, which swells on hover and squeezes on press.',
   css:`.cta-marquee { padding: 16px; border-radius: 999px; overflow: hidden;
   background: color-mix(in srgb, var(--cta-accent) 22%, var(--cta-paper)); color: color-mix(in srgb, var(--cta-accent) 35%, var(--cta-ink));
@@ -2014,7 +2014,7 @@ const BUTTONS = [
 
 /* ---------------- Encrypt family ---------------- */
 {
-  group:'encrypt', no:'26', name:'Scramble', cls:'cta-encrypt', stage:'var(--cta-ink)', setup: setupEncrypt,
+  group:'encrypt', no:'26', name:'Scramble', cls:'cta-encrypt', setup: setupEncrypt,
   note:'Hover scrambles the label into symbols and resolves it left to right while a scan line sweeps the face.',
   css:`.cta-encrypt { padding: 8px 16px; border-radius: 8px; overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--cta-ink) 55%, var(--cta-paper));
@@ -2288,11 +2288,10 @@ const BUTTONS = [
 /* ---------------- Hamburger family ---------------- */
 {
   group:'burger', no:'36', name:'Twist Menu', cls:'cta-burger', setup: setupToggle,
-  stage:'linear-gradient(135deg, color-mix(in srgb, var(--cta-accent) 55%, var(--cta-hot)), var(--cta-accent))',
   note:'The bars slide together, then twist into an X; closing runs the same two steps in reverse. The short bar tucks in behind.',
   css:`.cta-burger { width: 80px; height: 80px; padding: 0; border-radius: 50%; background: transparent; transition: background-color .15s; }
-.cta-burger:is(:hover, :focus-visible, .is-active) { background: color-mix(in srgb, var(--cta-paper) 20%, transparent); }
-.cta-burger .bar { position: absolute; height: 4px; background: var(--cta-paper);
+.cta-burger:is(:hover, :focus-visible, .is-active) { background: color-mix(in srgb, var(--cta-ink) 8%, transparent); }
+.cta-burger .bar { position: absolute; height: 4px; background: var(--cta-ink);
   transition: top .25s ease-in-out .25s, bottom .25s ease-in-out .25s, left .5s ease-in-out, transform .25s ease-in-out; }
 .cta-burger .t { width: 40px; left: 50%; top: 35%; transform: translate(-50%, -50%); }
 .cta-burger .m { width: 40px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
@@ -2408,7 +2407,6 @@ const BUTTONS = [
 /* ---------------- Magnet family ---------------- */
 {
   group:'magnet', no:'41', name:'Drift Ring', cls:'cta-magnet', setup: setupMagnet, stageCss:'min-height:380px',
-  stage:'color-mix(in srgb, var(--cta-accent) 22%, var(--cta-paper))',
   note:'A big ring that drifts after the pointer. Hover fills it, swings the arrow level, and fades in text circling the edge.',
   css:`.cta-magnet { width: 220px; height: 220px; padding: 0; justify-content: center; border-radius: 50%; border: 2px solid var(--cta-ink);
   background: transparent; color: var(--cta-ink); will-change: transform; }
@@ -2722,7 +2720,7 @@ const BUTTONS = [
 
 /* ---------------- Gradient Shadow family ---------------- */
 {
-  group:'glow', no:'56', name:'Glow Border', cls:'cta-gshadow', stage:'color-mix(in srgb, var(--cta-ink) 92%, var(--cta-accent))',
+  group:'glow', no:'56', name:'Glow Border', cls:'cta-gshadow',
   note:'A gradient-bordered button over a soft blurred glow. Hover scales it up and turns the glow all the way on.',
   css:`.cta-gshadow-wrap { --grad: linear-gradient(to bottom right, var(--cta-accent), color-mix(in srgb, var(--cta-hot) 65%, var(--cta-accent)));
   position: relative; display: inline-block; transition: transform .3s; }
@@ -2836,7 +2834,7 @@ const BUTTONS = [
 
 /* ---------------- Splash family ---------------- */
 {
-  group:'splash', no:'61', name:'Ring Offset', cls:'cta-splash', stage:'var(--cta-ink)',
+  group:'splash', no:'61', name:'Ring Offset', cls:'cta-splash',
   note:'A gradient button inside an offset ring. Hover grows it a touch and lets the ring go; pressing brings the ring back brighter.',
   css:`.cta-splash { padding: 8px 16px; border-radius: 6px; font-size: 18px; font-weight: 400; letter-spacing: 0; color: var(--cta-paper);
   background: linear-gradient(to bottom right, color-mix(in srgb, var(--cta-accent) 65%, var(--cta-paper)), color-mix(in srgb, var(--cta-accent) 75%, var(--cta-ink)));
@@ -3032,7 +3030,7 @@ const BUTTONS = [
 
 /* ---------------- Spotlight family ---------------- */
 {
-  group:'spot', no:'71', name:'Sliding Spotlight', cls:'cta-slidespot', setup: setupSlideSpot, stage:'color-mix(in srgb, var(--cta-ink) 92%, var(--cta-accent))',
+  group:'spot', no:'71', name:'Sliding Spotlight', cls:'cta-slidespot', setup: setupSlideSpot,
   note:'A disc of light glides along the button after the pointer and the label inverts wherever it overlaps. It drifts back to center when you leave.',
   css:`.cta-slidespot { width: 100%; max-width: 320px; padding: 12px 16px; justify-content: center; border-radius: 8px; overflow: hidden;
   background: var(--cta-ink); color: var(--cta-paper); font-size: 18px; font-weight: 500; transition: transform .15s var(--out); }
@@ -3125,7 +3123,7 @@ const BUTTONS = [
 
 /* ---------------- Soft UI family ---------------- */
 {
-  group:'soft', no:'76', name:'Soft Pill', cls:'cta-neu', stage:'color-mix(in srgb, var(--cta-ink) 6%, var(--cta-paper))',
+  group:'soft', no:'76', name:'Soft Pill', cls:'cta-neu',
   note:'A pill pressed softly out of the surface. Hover sinks it in, with an inner shadow and an accent-colored label.',
   css:`.cta-neu { --bg: color-mix(in srgb, var(--cta-ink) 6%, var(--cta-paper)); --hi: color-mix(in srgb, var(--cta-paper) 85%, transparent); --lo: color-mix(in srgb, var(--cta-ink) 24%, transparent);
   padding: 8px 16px; gap: 8px; border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--cta-ink) 55%, var(--cta-paper));
@@ -3215,7 +3213,7 @@ const BUTTONS = [
 
 /* ---------------- Neubrutalism family ---------------- */
 {
-  group:'brutal', no:'81', name:'Hard Shadow', cls:'cta-neubrutal', stage:'var(--cta-paper)',
+  group:'brutal', no:'81', name:'Hard Shadow', cls:'cta-neubrutal',
   note:'Flat color, square corners and a hard black shadow. Hover slides the button into its own shadow.',
   css:`.cta-neubrutal { padding: 10px 26px; background: var(--cta-accent); color: var(--cta-paper); font-weight: 600;
   box-shadow: 4px 4px 0 var(--cta-ink); transition: all .15s cubic-bezier(.4, 0, .2, 1); }
@@ -3380,16 +3378,16 @@ const BUTTONS = [
 
 /* ---------------- Stars & Sparkle family ---------------- */
 {
-  group:'stars', no:'97', name:'Star Burst', cls:'cta-starburst', stage:'color-mix(in srgb, var(--cta-ink) 92%, var(--cta-accent))',
+  group:'stars', no:'97', name:'Star Burst', cls:'cta-starburst',
   note:'Six sparkles hide behind the button. Hover turns it into a glowing outline and sends the stars flying out around it, each on its own easing.',
-  css:`.cta-starburst { --gold: color-mix(in srgb, var(--cta-hot) 40%, var(--cta-pop)); --star: color-mix(in srgb, var(--cta-paper) 90%, var(--cta-pop));
+  css:`.cta-starburst { --gold: color-mix(in srgb, var(--cta-hot) 40%, var(--cta-pop)); --star: var(--gold);
   padding: 12px 34px; border-radius: 10px; background: var(--gold); color: var(--cta-ink); border: 3px solid var(--gold);
   font-size: 17px; font-weight: 500; box-shadow: 0 0 0 transparent; transition: all .3s ease-in-out; }
 .cta-starburst .s { position: absolute; top: var(--t0); left: var(--l0); width: var(--w); color: var(--star); opacity: 0; transform: scale(.3); pointer-events: none;
   filter: drop-shadow(0 0 0 var(--star));
   transition: top var(--d) var(--e), left var(--d) var(--e), transform var(--d) var(--e), opacity .4s, filter .6s; }
 .cta-starburst .s svg { width: 100%; height: auto; }
-.cta-starburst:is(:hover, :focus-visible, .is-active) { background: transparent; color: var(--gold); box-shadow: 0 0 26px color-mix(in srgb, var(--gold) 55%, transparent); }
+.cta-starburst:is(:hover, :focus-visible, .is-active) { background: var(--cta-ink); color: var(--gold); box-shadow: 0 0 26px color-mix(in srgb, var(--gold) 55%, transparent); }
 .cta-starburst:is(:hover, :focus-visible, .is-active) .s { top: var(--t1); left: var(--l1); opacity: 1; transform: scale(1); filter: drop-shadow(0 0 8px var(--star)); }`,
   html:`<button type="button" class="cta cta-starburst">Make a wish
   <span class="s" style="--w: 24px; --t0: 20%; --l0: 20%; --t1: -85%; --l1: -28%; --d: 1s; --e: cubic-bezier(.05, .83, .43, .96)" aria-hidden="true">${SPARKLE}</span>
