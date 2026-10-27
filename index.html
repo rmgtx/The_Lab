@@ -130,6 +130,7 @@ pre{margin:0;padding:14px 20px 20px;max-height:340px;overflow:auto;font-family:v
 </style>
 
 <style id="cta-styles"></style>
+<link rel="stylesheet" href="workbench.css">
 
 <div class="wrap">
   <header class="top">
@@ -139,6 +140,7 @@ pre{margin:0;padding:14px 20px 20px;max-height:340px;overflow:auto;font-family:v
     </div>
     <span class="count" id="count"></span>
   </header>
+  <section id="workbench" class="workbench" aria-labelledby="wb-title"></section>
   <section class="palette" aria-label="Button colors">
     <div class="pal-row">
       <span class="pal-label">Colors</span>
@@ -4105,6 +4107,7 @@ function toast(msg){
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
 }
 </script>
+<script src="workbench.js"></script>
 
 </body>
 </html>

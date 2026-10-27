@@ -56,6 +56,29 @@ python3 -m http.server
 
 ## Use a button in your project
 
+### Customize & Preview workbench
+
+The workbench above the library starts with five buttons: Classic Dot, Hard Press,
+Shine Sweep, Corner Trace, and Deck Stack. Change the label, size, corners, icon,
+motion speed, and local palette, then preview the result on a canvas or inside a card.
+
+- Pin idle, hover, pressed, focus, disabled, loading, or success states. Loading and
+  success are simulations; the consuming application controls the real action.
+- Each specimen keeps its edits while the page stays open. Reloading clears these
+  drafts. **Reset this specimen** resets only the selected button and takes the
+  current library palette. **Use library colors** updates just its colors.
+- Workbench copies always include their CSS, independently of the gallery's shared
+  base checkbox. Each design has a scoped class so customized exports can coexist.
+- Exports start at rest; pinned preview states and the canvas background are omitted.
+- React exports accept `children`, `onClick`, `type`, `disabled`, `loading`, and
+  `success`, plus other native button props. HTML exports use native `disabled`
+  and `data-status="loading"` / `data-status="success"` for application-driven states.
+
+The workbench lives in `workbench.js` and `workbench.css`, and reads the existing
+button registry. Keep these files beside `index.html` when sharing the Lab.
+
+### Copy from the full library
+
 1. Find a button you like and pick your colors in the color bar (or press **Randomize**).
 2. Click **Copy HTML** or **Copy React**.
 3. Paste it. The copy carries your chosen colors as five CSS variables at the top, so you can still fine-tune them by hand.
@@ -90,6 +113,21 @@ Current versions of Chrome, Edge, Safari and Firefox. The buttons rely on CSS cu
 ## Credits
 
 Some sections began as riffs on open-source designs shared by the community on [Uiverse](https://uiverse.io), which publishes its elements under the MIT license. Thank you to everyone who shares their work there. Every button in The Lab has been rebuilt from scratch for the shared palette, both copy formats and accessibility.
+
+## Development checks
+
+The site still runs without installation or a build. Optional development
+dependencies exercise the workbench and compile/render its generated React exports:
+
+```bash
+npm ci
+npm test
+```
+
+Use a current Node LTS release (Node 24.15 or newer in the 24.x line).
+Checks cover state semantics, draft isolation, scoped/escaped HTML, React props,
+icon changes, reduced-motion CSS, and clipboard fallback. Browser checks should
+also cover keyboard focus and narrow layouts; DOM tests do not verify layout.
 
 ## License
 
