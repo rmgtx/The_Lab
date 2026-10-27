@@ -2,7 +2,9 @@
 
 **108 animated call-to-action buttons. Preview them live, recolor all of them at once, and copy any one as HTML + CSS or a React component.**
 
-![The Lab: the button library with its color bar](docs/preview.png)
+**[Open the live site →](https://the-lab.rmgtx.workers.dev)**
+
+![The Lab: the button library with its top bar](docs/preview.png)
 
 The Lab is a single-page library of interactive buttons, from quiet hover states to spring physics, water ripples and click feedback. Every button reads from one shared five-color palette, so you can see the whole collection in your brand's colors before you copy a thing.
 
@@ -57,6 +59,8 @@ python3 -m http.server
 ## Use a button in your project
 
 ### Customize & Preview workbench
+
+![The workbench with five buttons in its comparison tray](docs/workbench.png)
 
 Open **Workbench** in the top bar for the dedicated workbench.
 The **Library** tab contains the gallery; its **Colors** menu holds the palette. Select **Add to
@@ -135,6 +139,16 @@ Current versions of Chrome, Edge, Safari and Firefox. The buttons rely on CSS cu
 ## Credits
 
 Some sections began as riffs on open-source designs shared by the community on [Uiverse](https://uiverse.io), which publishes its elements under the MIT license. Thank you to everyone who shares their work there. Every button in The Lab has been rebuilt from scratch for the shared palette, both copy formats and accessibility.
+
+## Deploy
+
+The site is served from Cloudflare Workers as static assets at
+[the-lab.rmgtx.workers.dev](https://the-lab.rmgtx.workers.dev). `wrangler.jsonc` serves the
+repository root; `.assetsignore` keeps tests, packages and config out of the upload.
+
+```bash
+npx wrangler deploy
+```
 
 ## Development checks
 
