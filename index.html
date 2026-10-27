@@ -228,7 +228,21 @@ const GROUPS = [
   { id:'brutal', title:'Neubrutalism', note:'Thick outlines, hard shadows and loud flat color: a stacked deck, a peeling sticker, a swinging price tag, a keycap, a rubber stamp, a ransom note and a button that begs you not to press it.' },
   { id:'fold', title:'Folds & Corners', note:'Paper-inspired buttons: dog-eared corners, a page that turns, a camera viewfinder, an envelope that opens, corners that fill in and a folded ribbon. Pure CSS.' },
   { id:'stars', title:'Stars & Sparkle', note:'Celestial buttons: stars that burst out on hover, a constellation that draws itself, shooting stars, a twinkling night sky and a click that goes supernova. Made for dark backgrounds.' },
+  { id:'3d', title:'3D', note:'Real depth with CSS 3D transforms: a rolling cube, an extruded block, a flipping card, a split-flap departure board, an arcade button and a ringed planet. Pure CSS.' },
 ];
+
+function boardHTML(from, to) {
+  const tiles = [...from].map((c, i) => {
+    const a = c === ' ' ? '&nbsp;' : c;
+    const b = to[i] === ' ' ? '&nbsp;' : to[i];
+    return `    <span class="tile" style="--d: ${i * 45}ms"><span class="cube"><span class="a">${a}</span><span class="b">${b}</span></span></span>`;
+  }).join('\n');
+  return `<button type="button" class="cta cta-board" aria-label="${from.charAt(0) + from.slice(1).toLowerCase()}">
+  <span class="row" aria-hidden="true">
+${tiles}
+  </span>
+</button>`;
+}
 
 const SPARKLE = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C12.6 6.6 17.4 11.4 24 12C17.4 12.6 12.6 17.4 12 24C11.4 17.4 6.6 12.6 0 12C6.6 11.4 11.4 6.6 12 0Z"></path></svg>`;
 
@@ -981,7 +995,7 @@ function setupHold(el) {
 function setupCart(el) {
   const label = el.querySelector('.lbl');
   const bag = el.querySelector('.bag');
-  const count = el.querySelector('.count');
+  const count = el.querySelector('.qty');
   let n = 0;
   const land = () => {
     n++;
@@ -2228,14 +2242,14 @@ const BUTTONS = [
 .cta-cart .bag { position: relative; width: 40px; height: 40px; border-radius: 50%; background: var(--cta-pop); color: var(--cta-ink);
   display: grid; place-items: center; transition: transform .4s var(--spring); }
 .cta-cart .bag svg { width: 20px; height: 20px; }
-.cta-cart .count { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box;
+.cta-cart .qty { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box;
   border-radius: 999px; background: var(--cta-accent); color: var(--cta-paper); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center;
   font-variant-numeric: tabular-nums; transform: scale(0); transition: transform .35s var(--spring); }
 .cta-cart:is(:hover, :focus-visible, .is-active) .bag { transform: rotate(-10deg); }
 .cta-cart:active { transform: scale(.97); }
-.cta-cart.has .count { transform: scale(1); }
+.cta-cart.has .qty { transform: scale(1); }
 .cta-cart.bump .bag { animation: cta-cart-bump .5s var(--spring); }
-.cta-cart.bump .count { animation: cta-cart-tick .4s var(--spring); }
+.cta-cart.bump .qty { animation: cta-cart-tick .4s var(--spring); }
 .cta-cart .fly { position: absolute; left: var(--sx); top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; pointer-events: none;
   animation: cta-cart-x .55s linear forwards; }
 .cta-cart .fly i { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--cta-pop); animation: cta-cart-y .55s forwards; }
@@ -2249,7 +2263,7 @@ const BUTTONS = [
 @keyframes cta-cart-tick { 40% { transform: scale(1.4); } }`,
   html:`<button type="button" class="cta cta-cart" aria-label="Add to cart">
   <span class="lbl" aria-hidden="true">Add to cart</span>
-  <span class="bag" aria-hidden="true">${BAG}<span class="count">0</span></span>
+  <span class="bag" aria-hidden="true">${BAG}<span class="qty">0</span></span>
 </button>`
 },
 
@@ -3473,6 +3487,109 @@ const BUTTONS = [
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--r)); opacity: 0; }
 }`,
   html:`<button type="button" class="cta cta-nova">Go supernova</button>`
+},
+
+/* ---------------- 3D family ---------------- */
+{
+  group:'3d', no:'102', name:'Cube Roll', cls:'cta-cube',
+  note:'The button is the front face of a cube. Hover rolls it forward to bring the top face, with the next step on it, into view.',
+  css:`.cta-cube { width: 204px; height: 54px; padding: 0; background: transparent; perspective: 600px; font-weight: 700; transition: transform .15s var(--out); }
+.cta-cube .cube { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(-27px) rotateX(0deg);
+  transition: transform .6s cubic-bezier(.3, 1.35, .5, 1); }
+.cta-cube .f { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; backface-visibility: hidden; }
+.cta-cube .front { background: var(--cta-accent); color: var(--cta-paper); transform: translateZ(27px); }
+.cta-cube .top { background: var(--cta-ink); color: var(--cta-pop); transform: rotateX(90deg) translateZ(27px); }
+.cta-cube .top svg { width: 18px; height: 18px; }
+.cta-cube:is(:hover, :focus-visible, .is-active) .cube { transform: translateZ(-27px) rotateX(-90deg); }
+.cta-cube:active { transform: scale(.96); }`,
+  html:`<button type="button" class="cta cta-cube" aria-label="Get started">
+  <span class="cube" aria-hidden="true"><span class="f front">Get started</span><span class="f top"><span>Let’s go</span>${ARROW}</span></span>
+</button>`
+},
+{
+  group:'3d', no:'103', name:'Extruded Block', cls:'cta-extrude',
+  note:'A thick block tilted in space. Hover lifts it and deepens the extrusion; pressing squashes it nearly flat.',
+  css:`.cta-extrude { height: 54px; padding: 0 30px; border-radius: 8px; background: var(--cta-accent); color: var(--cta-paper); font-weight: 800; letter-spacing: .02em;
+  transform: perspective(600px) rotateX(18deg) rotateY(-16deg);
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--cta-accent) 68%, var(--cta-ink)), 2px 2px 0 color-mix(in srgb, var(--cta-accent) 66%, var(--cta-ink)), 3px 3px 0 color-mix(in srgb, var(--cta-accent) 64%, var(--cta-ink)), 4px 4px 0 color-mix(in srgb, var(--cta-accent) 62%, var(--cta-ink)), 5px 5px 0 color-mix(in srgb, var(--cta-accent) 60%, var(--cta-ink)), 6px 6px 0 color-mix(in srgb, var(--cta-accent) 58%, var(--cta-ink)), 7px 7px 0 color-mix(in srgb, var(--cta-accent) 56%, var(--cta-ink)), 8px 8px 0 color-mix(in srgb, var(--cta-accent) 54%, var(--cta-ink)), 9px 9px 0 color-mix(in srgb, var(--cta-accent) 52%, var(--cta-ink)), 10px 10px 0 color-mix(in srgb, var(--cta-accent) 50%, var(--cta-ink));
+  transition: transform .35s var(--spring), box-shadow .35s var(--out); }
+.cta-extrude:is(:hover, :focus-visible, .is-active) { transform: perspective(600px) rotateX(22deg) rotateY(-22deg) translate(-4px, -4px);
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--cta-accent) 69%, var(--cta-ink)), 2px 2px 0 color-mix(in srgb, var(--cta-accent) 68%, var(--cta-ink)), 3px 3px 0 color-mix(in srgb, var(--cta-accent) 67%, var(--cta-ink)), 4px 4px 0 color-mix(in srgb, var(--cta-accent) 66%, var(--cta-ink)), 5px 5px 0 color-mix(in srgb, var(--cta-accent) 65%, var(--cta-ink)), 6px 6px 0 color-mix(in srgb, var(--cta-accent) 64%, var(--cta-ink)), 7px 7px 0 color-mix(in srgb, var(--cta-accent) 63%, var(--cta-ink)), 8px 8px 0 color-mix(in srgb, var(--cta-accent) 62%, var(--cta-ink)), 9px 9px 0 color-mix(in srgb, var(--cta-accent) 61%, var(--cta-ink)), 10px 10px 0 color-mix(in srgb, var(--cta-accent) 60%, var(--cta-ink)), 11px 11px 0 color-mix(in srgb, var(--cta-accent) 59%, var(--cta-ink)), 12px 12px 0 color-mix(in srgb, var(--cta-accent) 58%, var(--cta-ink)), 13px 13px 0 color-mix(in srgb, var(--cta-accent) 57%, var(--cta-ink)), 14px 14px 0 color-mix(in srgb, var(--cta-accent) 56%, var(--cta-ink)); }
+.cta-extrude:active { transform: perspective(600px) rotateX(18deg) rotateY(-16deg) translate(8px, 8px); transition-duration: .1s;
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--cta-accent) 66%, var(--cta-ink)), 2px 2px 0 color-mix(in srgb, var(--cta-accent) 62%, var(--cta-ink)); }`,
+  html:`<button type="button" class="cta cta-extrude">Build something</button>`
+},
+{
+  group:'3d', no:'104', name:'Card Flip', cls:'cta-flip',
+  note:'A two-sided card. Hover flips it over in 3D to show what’s printed on the back.',
+  css:`.cta-flip { width: 200px; height: 56px; padding: 0; background: transparent; perspective: 700px; font-weight: 700; transition: transform .15s var(--out); }
+.cta-flip .flipper { position: absolute; inset: 0; }
+.cta-flip .side { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 2px solid var(--cta-ink); }
+.cta-flip .a { background: var(--cta-paper); color: var(--cta-ink); transform: rotateY(0deg); transition: transform .28s ease-out .3s; }
+.cta-flip .b { background: var(--cta-pop); color: var(--cta-ink); transform: rotateY(-90deg); transition: transform .28s ease-in; }
+.cta-flip:is(:hover, :focus-visible, .is-active) .a { transform: rotateY(90deg); transition: transform .28s ease-in; }
+.cta-flip:is(:hover, :focus-visible, .is-active) .b { transform: rotateY(0deg); transition: transform .45s cubic-bezier(.3, 1.4, .5, 1) .28s; }
+.cta-flip:active { transform: scale(.96); }`,
+  html:`<button type="button" class="cta cta-flip" aria-label="See pricing, from $9 a month">
+  <span class="flipper" aria-hidden="true"><span class="side a">See pricing</span><span class="side b">From $9 / mo</span></span>
+</button>`
+},
+{
+  group:'3d', no:'105', name:'Departure Board', cls:'cta-board',
+  note:'A split-flap departure board. Hover flips every tile in sequence, changing BOOK NOW to BOARDING.',
+  css:`.cta-board { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--cta-ink) 90%, var(--cta-paper)); transition: transform .15s var(--out);
+  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--cta-ink) 60%, transparent); }
+.cta-board .row { display: flex; gap: 3px; }
+.cta-board .tile { position: relative; width: 22px; height: 32px; perspective: 160px; }
+.cta-board .cube { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(-16px); transition: transform .5s cubic-bezier(.4, 1.4, .6, 1) var(--d); }
+.cta-board .a, .cta-board .b { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 3px; backface-visibility: hidden;
+  background: var(--cta-ink); color: var(--cta-pop); font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 17px; font-weight: 700; }
+.cta-board .a::after, .cta-board .b::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: color-mix(in srgb, var(--cta-paper) 14%, transparent); }
+.cta-board .a { transform: translateZ(16px); }
+.cta-board .b { transform: rotateX(-90deg) translateZ(16px); color: var(--cta-paper); }
+.cta-board:is(:hover, :focus-visible, .is-active) .cube { transform: translateZ(-16px) rotateX(90deg); }
+.cta-board:active { transform: scale(.97); }`,
+  html: boardHTML('BOOK NOW', 'BOARDING')
+},
+{
+  group:'3d', no:'106', name:'Arcade', cls:'cta-arcade',
+  note:'A chunky arcade button sitting in its bezel. Hover makes it glow; pressing drives it deep into the cabinet.',
+  css:`.cta-arcade { width: 96px; height: 96px; padding: 0; flex-direction: column; justify-content: center; border-radius: 50%; color: var(--cta-paper);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--cta-hot) 60%, var(--cta-paper)), var(--cta-hot) 45%, color-mix(in srgb, var(--cta-hot) 80%, var(--cta-ink)));
+  box-shadow: 0 10px 0 color-mix(in srgb, var(--cta-hot) 60%, var(--cta-ink)), 0 10px 0 7px var(--cta-ink), 0 22px 22px -6px color-mix(in srgb, var(--cta-ink) 45%, transparent);
+  font-weight: 900; letter-spacing: .08em; transition: transform .1s var(--out), box-shadow .1s var(--out), filter .3s var(--out); }
+.cta-arcade small { font-size: 10px; font-weight: 700; opacity: .8; }
+.cta-arcade:is(:hover, :focus-visible, .is-active) { transform: translateY(-2px); filter: drop-shadow(0 0 14px color-mix(in srgb, var(--cta-hot) 55%, transparent));
+  box-shadow: 0 12px 0 color-mix(in srgb, var(--cta-hot) 60%, var(--cta-ink)), 0 12px 0 7px var(--cta-ink), 0 24px 24px -6px color-mix(in srgb, var(--cta-ink) 45%, transparent); }
+.cta-arcade:active { transform: translateY(8px);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--cta-hot) 60%, var(--cta-ink)), 0 2px 0 7px var(--cta-ink), 0 6px 8px -4px color-mix(in srgb, var(--cta-ink) 45%, transparent); }`,
+  html:`<button type="button" class="cta cta-arcade"><span>PLAY</span><small>1P</small></button>`
+},
+{
+  group:'3d', no:'107', name:'Ringed Planet', cls:'cta-saturn', stage:'color-mix(in srgb, var(--cta-ink) 92%, var(--cta-accent))',
+  note:'The button is a planet wrapped in a tilted ring, with a moon that orbits in front of it and then disappears behind. Hover lights up the ring.',
+  css:`.cta-saturn-wrap { position: relative; display: inline-block; padding: 40px 60px; margin: -40px -60px; isolation: isolate; }
+.cta-saturn-wrap .ring { position: absolute; left: 50%; top: 50%; width: 260px; height: 60px; margin: -30px 0 0 -130px; border-radius: 50%; pointer-events: none;
+  border: 3px solid color-mix(in srgb, var(--cta-pop) 70%, transparent); transform: rotate(-12deg); transition: border-color .4s var(--out), filter .4s var(--out); }
+.cta-saturn-wrap .ring.back { z-index: 1; clip-path: inset(0 0 50% 0); }
+.cta-saturn-wrap .ring.front { z-index: 3; clip-path: inset(50% 0 0 0); }
+.cta-saturn { z-index: 2; width: 150px; height: 54px; padding: 0; justify-content: center; border-radius: 999px; color: var(--cta-ink); font-weight: 700;
+  background: radial-gradient(circle at 35% 25%, color-mix(in srgb, var(--cta-pop) 55%, var(--cta-paper)), var(--cta-pop) 55%, color-mix(in srgb, var(--cta-pop) 70%, var(--cta-ink)));
+  transition: transform .15s var(--out), box-shadow .4s var(--out); }
+.cta-saturn-wrap .moon { position: absolute; left: 0; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--cta-paper); pointer-events: none;
+  box-shadow: 0 0 8px var(--cta-paper);
+  offset-path: path('M 8 94 A 130 30 -12 1 0 262 40 A 130 30 -12 1 0 8 94'); offset-rotate: 0deg;
+  animation: cta-saturn-orbit 7s linear infinite; }
+.cta-saturn:is(:hover, :focus-visible, .is-active) { box-shadow: 0 0 30px color-mix(in srgb, var(--cta-pop) 45%, transparent); }
+.cta-saturn:is(:hover, :focus-visible, .is-active) ~ .ring { border-color: var(--cta-pop); filter: drop-shadow(0 0 6px var(--cta-pop)); }
+.cta-saturn:active { transform: scale(.96); }
+@keyframes cta-saturn-orbit { 0% { offset-distance: 0%; z-index: 3; } 50% { z-index: 3; } 50.1% { z-index: 1; } 100% { offset-distance: 100%; z-index: 1; } }`,
+  html:`<span class="cta-saturn-wrap">
+  <button type="button" class="cta cta-saturn">Explore</button>
+  <span class="ring back" aria-hidden="true"></span>
+  <span class="ring front" aria-hidden="true"></span>
+  <span class="moon" aria-hidden="true"></span>
+</span>`
 },
 
 /* ---------------- Folds & Corners family ---------------- */

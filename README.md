@@ -1,6 +1,6 @@
 # The Lab
 
-**102 animated call-to-action buttons. Preview them live, recolor all of them at once, and copy any one as HTML + CSS or a React component.**
+**108 animated call-to-action buttons. Preview them live, recolor all of them at once, and copy any one as HTML + CSS or a React component.**
 
 ![The Lab: the button library with its color bar](docs/preview.png)
 
@@ -8,7 +8,7 @@ The Lab is a single-page library of interactive buttons, from quiet hover states
 
 ## Highlights
 
-- **102 buttons in 16 sections**, each with a short description of what it does
+- **108 buttons in 17 sections**, each with a short description of what it does
 - **Live palette:** five color variables (Ink, Paper, Accent, Pop, Signal) plus a preview background, all editable with color pickers
 - **Randomizer with locks:** generate a matching palette in one click, and lock any color you want to keep
 - **Presets:** Default, Midnight, Sunset, Forest and Mono
@@ -38,8 +38,9 @@ The Lab is a single-page library of interactive buttons, from quiet hover states
 | Neubrutalism | 10 | Hard shadows and loud color: a stacked deck, a peeling sticker, a swinging price tag, a keycap, a rubber stamp, a ransom note and more |
 | Folds & Corners | 6 | Dog-eared corners, a page curl, a viewfinder, an envelope, filling corners and a folded ribbon |
 | Stars & Sparkle | 5 | Bursting stars, a self-drawing constellation, shooting stars, a twinkling night sky and a supernova click |
+| 3D | 6 | A rolling cube, an extruded block, a flipping card, a split-flap departure board, an arcade button and a ringed planet |
 
-![All 102 buttons in their hover states](docs/gallery.png)
+![All 108 buttons in their hover states](docs/gallery.png)
 
 ## Run it
 
