@@ -147,7 +147,7 @@ test('favorites are independent snapshots, restored after reload, with remove an
 });
 test('every card can be added; a full tray asks which button to replace and preserves its edits',t=>{
   const f=fixture(t);f.change('#wb-label','Keep my draft');
-  assert.equal(f.doc.querySelectorAll('[data-workbench-open]').length,108);
+  assert.equal(f.doc.querySelectorAll('[data-workbench-open]').length,111);
   f.click('[data-workbench-open="cta-sticker"]');assert.equal(f.$('#wb-replace').hidden,false);assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
   f.change('#wb-replace-choice','cta-classic');f.click('#wb-confirm-replace');
   assert.ok(f.$('[data-specimen="cta-sticker"]'));assert.equal(f.$('#wb-label').disabled,false);assert.ok(f.$('#wb-sample iframe'));assert.equal(f.doc.querySelectorAll('.wb-tray-item').length,5);
@@ -166,7 +166,7 @@ test('invalid saved values are sanitized and unavailable storage is reported wit
   const broken=fixture(t,{saved:'{bad json'});assert.ok(broken.$('#wb-storage-note').textContent.includes('could not be read'));
   const full=fixture(t,{blockStorage:true});full.change('#wb-label','Still editable');assert.ok(full.$('#wb-storage-note').textContent.includes('unavailable or full'));assert.equal(full.$('#wb-sample .wb-label').textContent,'Still editable');
 });
-test('all 108 registry buttons export compilable React and runnable standalone HTML',async t=>{
+test('all 111 registry buttons export compilable React and runnable standalone HTML',async t=>{
   const f=fixture(t);
   for(const link of [...f.doc.querySelectorAll('[data-workbench-open]')]){
     link.click();if(!f.$('#wb-replace').hidden) f.click('#wb-confirm-replace');
@@ -201,7 +201,7 @@ test('global navigation separates the library and workbench, including deep link
   f.click('[data-workbench-open="cta-sticker"]'); assert.equal(f.$('#library').hidden,true); assert.equal(f.$('#wb-replace').hidden,false);
 });
 
-test('all 108 customized designs retain text, effects, state controls and runnable exports', async t => {
+test('all 111 customized designs retain text, effects, state controls and runnable exports', async t => {
   const f = fixture(t), errors = [];
   const label = 'RIP < & {go}';
   for (const link of [...f.doc.querySelectorAll('[data-workbench-open]')]) {

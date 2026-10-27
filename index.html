@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lab · Animated Button Library</title>
-<meta name="description" content="108 animated call-to-action buttons with a live palette, randomizer and one-click copy as HTML + CSS or React.">
+<meta name="description" content="111 animated call-to-action buttons with a live palette, randomizer and one-click copy as HTML + CSS or React.">
 <meta property="og:title" content="The Lab · Animated Button Library">
-<meta property="og:description" content="108 animated call-to-action buttons with a live palette, randomizer and one-click copy as HTML + CSS or React.">
+<meta property="og:description" content="111 animated call-to-action buttons with a live palette, randomizer and one-click copy as HTML + CSS or React.">
 <meta property="og:image" content="docs/preview.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='18' width='52' height='28' rx='14' fill='%230A0A0A'/%3E%3Ccircle cx='22' cy='32' r='6' fill='%23D4FF3A'/%3E%3C/svg%3E">
 <style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -239,7 +239,7 @@ const GROUPS = [
   { id:'burger', title:'Menu Toggles', note:'Menu icons that morph into an X, a back arrow or a dotted cross. Click to open and close; each sets its open state for screen readers.' },
   { id:'magnet', title:'Magnetic Physics', note:'Spring physics and pointer magnetism: buttons that drift, stare, stretch, swing on a string and swarm your cursor.' },
   { id:'dotted', title:'Dashed Lines', note:'The dashed border reimagined as a selection box, a ticket stub, a wireframe and a clip-out coupon. Pure CSS.' },
-  { id:'glow', title:'Glow & Light', note:'Gradient halos, spinning light, aurora glass, a neon tube and a broadcast pulse. Made for dark backgrounds. Pure CSS.' },
+  { id:'glow', title:'Glow & Light', note:'Gradient halos, spinning light, aurora glass, a neon tube, a broadcast pulse and glowing ripples that call for a click. Made for dark backgrounds.' },
   { id:'splash', title:'Splash & Ripple', note:'Water in every form: splashes, rain, paint splats, a reflection pool and ripples that roll across the surface.' },
   { id:'spot', title:'Spotlight', note:'A light that tracks the pointer across the button: revealing hidden messages, mixing colored beams, x-raying the inside and casting long shadows. Light JavaScript for the tracking.' },
   { id:'soft', title:'Soft UI', note:'Neumorphic buttons pressed out of the surface itself: soft shadows, a toggle that stays pushed in, a clicking dial, clay and embossed type. Best on a background that matches the button.' },
@@ -887,6 +887,18 @@ function setupParallaxRings(el) {
   el.addEventListener('pointermove', move);
   el.addEventListener('pointerleave', leave);
   return () => { layers.forEach((l) => l.s.stop()); el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); };
+}
+
+function setupAttract(el) {
+  // Ripples loop to draw the eye until the first click, then settle.
+  let t = 0;
+  const engage = () => {
+    el.classList.add('engaged');
+    clearTimeout(t);
+    t = setTimeout(() => el.classList.remove('engaged'), 4000);
+  };
+  el.addEventListener('click', engage);
+  return () => { clearTimeout(t); el.removeEventListener('click', engage); };
 }
 
 function setupToggle(el) {
@@ -2829,6 +2841,88 @@ const BUTTONS = [
   html:`<button type="button" class="cta cta-live" aria-label="Go live">
   <span class="dot" aria-hidden="true"><i></i><i></i><i></i></span>
   <span class="lbl" aria-hidden="true"><span>Go live</span><span>You’re live</span></span>
+</button>`
+},
+{
+  group:'glow', no:'108', name:'Pulse Rings', cls:'cta-pulse', setup: setupAttract, stage:'color-mix(in srgb, var(--cta-ink) 92%, var(--cta-accent))',
+  note:'Glowing rings keep rippling off the pill to draw the eye. Click and they settle while the button confirms.',
+  css:`.cta-pulse { height: 54px; padding: 0 30px; border-radius: 999px; color: var(--cta-paper); font-weight: 600;
+  background: linear-gradient(135deg, var(--cta-accent), color-mix(in srgb, var(--cta-hot) 55%, var(--cta-accent)));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--cta-accent) 45%, transparent);
+  transition: box-shadow .4s var(--out), background .4s var(--out), color .4s var(--out), transform .15s var(--out); }
+.cta-pulse .ring { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+  border: 2px solid color-mix(in srgb, var(--cta-accent) 65%, var(--cta-paper));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--cta-accent) 70%, transparent), inset 0 0 10px color-mix(in srgb, var(--cta-accent) 40%, transparent);
+  animation: cta-pulse-ring 2.4s cubic-bezier(.2, .6, .3, 1) infinite; }
+.cta-pulse .ring:nth-of-type(2) { animation-delay: .8s; }
+.cta-pulse .ring:nth-of-type(3) { animation-delay: 1.6s; }
+.cta-pulse .lbl { display: block; height: 20px; line-height: 20px; overflow: hidden; }
+.cta-pulse .lbl span { display: block; transition: transform .45s var(--out); }
+.cta-pulse:is(:hover, :focus-visible, .is-active) { box-shadow: 0 0 36px color-mix(in srgb, var(--cta-accent) 65%, transparent); }
+.cta-pulse:is(:hover, :focus-visible, .is-active) .ring { animation-duration: 1.6s; }
+.cta-pulse:active { transform: scale(.97); }
+.cta-pulse.engaged { background: var(--cta-pop); color: var(--cta-ink); box-shadow: 0 0 30px color-mix(in srgb, var(--cta-pop) 45%, transparent); }
+.cta-pulse.engaged .ring { animation: none; }
+.cta-pulse.engaged .lbl span { transform: translateY(-100%); }
+@keyframes cta-pulse-ring { 0% { inset: 0; opacity: .9; } 100% { inset: -26px; opacity: 0; } }`,
+  html:`<button type="button" class="cta cta-pulse" aria-label="Claim your invite">
+  <span class="ring" aria-hidden="true"></span><span class="ring" aria-hidden="true"></span><span class="ring" aria-hidden="true"></span>
+  <span class="lbl" aria-hidden="true"><span>Claim your invite</span><span>Invite claimed ✓</span></span>
+</button>`
+},
+{
+  group:'glow', no:'109', name:'Sonar Play', cls:'cta-sonar', setup: setupPressToggle, stage:'color-mix(in srgb, var(--cta-ink) 92%, var(--cta-accent))',
+  note:'A round play button sending out sonar pings to say “press me”. Click to play: the pings stop and it becomes a pause button.',
+  css:`.cta-sonar { width: 72px; height: 72px; padding: 0; justify-content: center; border-radius: 50%; color: var(--cta-ink);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--cta-pop) 60%, var(--cta-paper)), var(--cta-pop) 60%);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--cta-pop) 45%, transparent); transition: box-shadow .4s var(--out), transform .2s var(--spring); }
+.cta-sonar .ping { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: 0;
+  border: 1.5px solid var(--cta-pop); box-shadow: 0 0 12px color-mix(in srgb, var(--cta-pop) 60%, transparent);
+  animation: cta-sonar-ping 2.7s cubic-bezier(.15, .55, .35, 1) infinite; }
+.cta-sonar .ping:nth-of-type(2) { animation-delay: .9s; }
+.cta-sonar .ping:nth-of-type(3) { animation-delay: 1.8s; }
+.cta-sonar .ico { display: grid; width: 26px; height: 26px; }
+.cta-sonar .ico svg { grid-area: 1/1; width: 26px; height: 26px; transition: transform .35s var(--spring), opacity .2s; }
+.cta-sonar .ico svg:first-child { transform: translateX(2px); }
+.cta-sonar .ico svg + svg { opacity: 0; transform: scale(.4); }
+.cta-sonar:is(:hover, :focus-visible, .is-active) { transform: scale(1.06); box-shadow: 0 0 40px color-mix(in srgb, var(--cta-pop) 65%, transparent); }
+.cta-sonar:active { transform: scale(.94); }
+.cta-sonar.on .ping { animation: none; }
+.cta-sonar.on .ico svg:first-child { opacity: 0; transform: scale(.4); }
+.cta-sonar.on .ico svg + svg { opacity: 1; transform: none; }
+@keyframes cta-sonar-ping { 0% { inset: 0; opacity: .9; } 100% { inset: -44px; opacity: 0; } }`,
+  html:`<button type="button" class="cta cta-sonar" aria-label="Play the demo" aria-pressed="false">
+  <span class="ping" aria-hidden="true"></span><span class="ping" aria-hidden="true"></span><span class="ping" aria-hidden="true"></span>
+  <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"></path></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></span>
+</button>`
+},
+{
+  group:'glow', no:'110', name:'Aurora Ripple', cls:'cta-auroraripple', setup: setupAttract, stage:'color-mix(in srgb, var(--cta-ink) 92%, var(--cta-accent))',
+  note:'Rings of aurora light, each a gradient of your palette, ripple off a dark pill on a loop. Click and the light settles into a steady glow.',
+  css:`.cta-auroraripple { height: 54px; gap: 10px; padding: 0 28px; border-radius: 999px; background: var(--cta-ink); color: var(--cta-paper); font-weight: 600;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cta-paper) 18%, transparent); transition: box-shadow .5s var(--out), transform .15s var(--out); }
+.cta-auroraripple .wave { position: absolute; inset: 0; border-radius: inherit; padding: 2px; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, var(--cta-accent), var(--cta-pop), var(--cta-hot), var(--cta-accent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cta-accent) 60%, transparent));
+  animation: cta-auroraripple-wave 3s cubic-bezier(.2, .6, .3, 1) infinite; }
+.cta-auroraripple .wave:nth-of-type(2) { animation-delay: 1s; }
+.cta-auroraripple .wave:nth-of-type(3) { animation-delay: 2s; }
+.cta-auroraripple .lbl { display: block; height: 20px; line-height: 20px; overflow: hidden; }
+.cta-auroraripple .lbl span { display: block; transition: transform .45s var(--out); }
+.cta-auroraripple svg { width: 18px; height: 18px; transition: transform .4s var(--spring); }
+.cta-auroraripple:is(:hover, :focus-visible, .is-active) svg { transform: translateX(3px); }
+.cta-auroraripple:is(:hover, :focus-visible, .is-active) .wave { animation-duration: 2s; }
+.cta-auroraripple:active { transform: scale(.97); }
+.cta-auroraripple.engaged { box-shadow: inset 0 0 0 2px var(--cta-pop), 0 0 28px color-mix(in srgb, var(--cta-pop) 40%, transparent), 0 0 60px color-mix(in srgb, var(--cta-accent) 35%, transparent); }
+.cta-auroraripple.engaged .wave { animation: none; }
+.cta-auroraripple.engaged .lbl span { transform: translateY(-100%); }
+@keyframes cta-auroraripple-wave { 0% { inset: 0; opacity: 1; } 100% { inset: -30px -40px; opacity: 0; } }`,
+  html:`<button type="button" class="cta cta-auroraripple" aria-label="Start your trial">
+  <span class="wave" aria-hidden="true"></span><span class="wave" aria-hidden="true"></span><span class="wave" aria-hidden="true"></span>
+  <span class="lbl" aria-hidden="true"><span>Start your trial</span><span>You’re all set</span></span>
+  ${ARROW}
 </button>`
 },
 

@@ -1,6 +1,6 @@
 # The Lab
 
-**108 animated call-to-action buttons. Preview them live, recolor all of them at once, and copy any one as HTML + CSS or a React component.**
+**111 animated call-to-action buttons. Preview them live, recolor all of them at once, and copy any one as HTML + CSS or a React component.**
 
 **[Open the live site →](https://the-lab.rmgtx.workers.dev)**
 
@@ -10,7 +10,7 @@ The Lab is a single-page library of interactive buttons, from quiet hover states
 
 ## Highlights
 
-- **108 buttons in 17 sections**, each with a short description of what it does
+- **111 buttons in 17 sections**, each with a short description of what it does
 - **Live palette:** five color variables (Ink, Paper, Accent, Pop, Signal) plus a preview background, all editable with color pickers
 - **Randomizer with locks:** generate a matching palette in one click, and lock any color you want to keep
 - **Presets:** Default, Midnight, Sunset, Forest and Mono
@@ -33,7 +33,7 @@ The Lab is a single-page library of interactive buttons, from quiet hover states
 | Menu Toggles | 5 | Menu icons that morph into an X, a back arrow or a dotted cross |
 | Magnetic Physics | 10 | Spring-driven buttons that drift, stare, stretch, swing and swarm |
 | Dashed Lines | 5 | Selection boxes, ticket stubs, wireframes and clip-out coupons |
-| Glow & Light | 5 | Gradient halos, aurora glass, a neon tube and a broadcast pulse |
+| Glow & Light | 8 | Gradient halos, aurora glass, a neon tube, a broadcast pulse and glowing ripples that loop until you click |
 | Splash & Ripple | 10 | Splashes, rain, paint splats, a reflection pool and rolling ripples |
 | Spotlight | 5 | A pointer-tracking light that reveals, mixes colored beams, x-rays and casts long shadows |
 | Soft UI | 5 | Neumorphic buttons: soft shadows, a press-in toggle, a clicking dial, clay and embossed type |
@@ -42,7 +42,7 @@ The Lab is a single-page library of interactive buttons, from quiet hover states
 | Stars & Sparkle | 5 | Bursting stars, a self-drawing constellation, shooting stars, a twinkling night sky and a supernova click |
 | 3D | 6 | A rolling cube, an extruded block, a flipping card, a split-flap departure board, an arcade button and a ringed planet |
 
-![All 108 buttons in their hover states](docs/gallery.png)
+![All 111 buttons in their hover states](docs/gallery.png)
 
 ## Run it
 
@@ -70,7 +70,7 @@ The tray holds up to five buttons with live previews. Select a button's name to
 edit it; use its × to remove it. If the tray is full, choose which button to
 replace. Removed buttons keep their saved edits for when you add them again.
 
-- All 108 buttons support label, size, corners, icon, palette, slower/no motion,
+- All 111 buttons support label, size, corners, icon, palette, slower/no motion,
   and loading/success previews. Animated letters, repeated text, circular SVG text,
   reflections, and JavaScript effects retain their structure. Icon-only controls
   get an editable caption. Alternate action messages (e.g. “Order placed”) retain
