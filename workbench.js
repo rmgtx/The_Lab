@@ -243,7 +243,7 @@ if (typeof ResizeObserver !== 'undefined') { new ResizeObserver(fitPreview).obse
       const html = `<span class="${cls}-root">${tpl.innerHTML}</span>`;
       const off = d.motion === 'none' ? `.${cls}-root, .${cls}-root *, .${cls}-root *::before, .${cls}-root *::after {animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important;}` : '';
       const cssOutput = `${scopedBase(cls)}\n.${cls}-root {display:inline-block;max-width:100%;--out:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);${vars}}\n${css}\n${customCSS}\n${off}\n@media(prefers-reduced-motion:reduce){.${cls}-root, .${cls}-root *, .${cls}-root *::before, .${cls}-root *::after {animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important;}}`;
-      const setup = WorkbenchAdapters.setupFor(b,d,cls,makeSpring);
+      const setup = WorkbenchAdapters.setupFor(b,d,cls,makeSpring,SPARKLE);
       return {css:cssOutput, html, cls, setup, init:setup ? 'setupWorkbench' : '', specimen:b.cls};
     }
     const originalHeight = b.css.match(/height:\s*(\d+)px/)[1];

@@ -2,6 +2,7 @@
 const WorkbenchAdapters = (() => {
   const iconOnly = new Set(['cta-burger','cta-backarrow','cta-dotgrid','cta-loop','cta-rings','cta-dial']);
   const primary = {
+    'cta-cube':'.front','cta-flip':'.side.a','cta-arcade':':scope > span:first-child','cta-curl':'.face','cta-envelope':'.lbl',
     'cta-terminal':'.ghost','cta-passcode':'.labels > span:first-child','cta-submit':'.label',
     'cta-hold':'.lbl > span:first-child','cta-menupill':'.words > span:first-child',
     'cta-ticket':'.main','cta-cut':':scope > span:first-child','cta-live':'.lbl > span:first-child',
@@ -26,7 +27,15 @@ const WorkbenchAdapters = (() => {
     if (changed) {
       button.setAttribute('aria-label', label);
       if (b.setup?.name === 'setupToggle') button.dataset.openLabel = `${label} · close`;
-      if (b.cls === 'cta-letter-cascade' || b.cls === 'cta-ransom') {
+      if (b.cls === 'cta-board') {
+        const row = button.querySelector('.row'), tile = row.firstElementChild.cloneNode(true);
+        row.replaceChildren();
+        Array.from(label).forEach((c,i) => {
+          const cell = tile.cloneNode(true); cell.style.setProperty('--d', `${i * 45}ms`);
+          cell.querySelectorAll('.a,.b').forEach(face => face.textContent = c === ' ' ? '\u00a0' : c);
+          row.append(cell);
+        });
+      } else if (b.cls === 'cta-letter-cascade' || b.cls === 'cta-ransom') {
         const word = button.querySelector('.word'), templates = [...word.children].filter(el => !el.classList.contains('gap'));
         word.replaceChildren();
         Array.from(label).forEach((c, i) => {
@@ -47,7 +56,7 @@ const WorkbenchAdapters = (() => {
         const walker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_TEXT), nodes = [];
         while (walker.nextNode()) {
           const n = walker.currentNode;
-          if (n.textContent.trim() && !n.parentElement.closest('svg,.count,.done,.deal,.stub,.mark,.ttl,.bp,.up')) nodes.push(n);
+          if (n.textContent.trim() && !n.parentElement.closest('svg,.count,.qty,.done,.deal,.stub,.mark,.ttl,.bp,.up')) nodes.push(n);
         }
         nodes.forEach(n => { n.textContent = b.cls === 'cta-marquee' ? `${label} •\u00a0` : label; });
       }
@@ -60,7 +69,7 @@ const WorkbenchAdapters = (() => {
     }
     if (d.icon !== 'original') {
       const shapes = {'cta-burger':'.bar','cta-backarrow':'.icon','cta-dotgrid':'.grid','cta-menupill':'.lines','cta-magnetic':'.dot','cta-watcher':'.face','cta-live':'.dot','cta-dial':'.knob,.ticks'};
-      const originals = [...button.querySelectorAll('svg')].filter(svg => !svg.querySelector('text,textPath'));
+      const originals = [...button.querySelectorAll('svg')].filter(svg => !svg.querySelector('text,textPath') && !svg.matches('.sky') && !svg.closest('.s'));
       if (shapes[b.cls]) button.querySelectorAll(shapes[b.cls]).forEach(el => el.classList.add('wb-original-icon'));
       const path = d.icon === 'plus' ? 'M12 5v14M5 12h14' : 'M7 17L17 7M7 7h10v10';
       for (const svg of originals) {
@@ -103,6 +112,7 @@ const WorkbenchAdapters = (() => {
 .${cls} .wb-spinner { width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:${cls}-spinner .7s linear infinite; }
 @keyframes ${cls}-spinner {to{transform:rotate(360deg)}}
 `;
+    if (b.cls === 'cta-board') css += `.${cls} .wb-custom-icon {color:var(--cta-pop);}`;
     if (iconOnly.has(b.cls)) css += `.${cls} .wb-custom-icon {position:absolute;inset:0;margin:0;}.${cls} .wb-custom-icon svg{width:28px;height:28px;}`;
     // Scale the complete composition so fixed geometry, SVG paths and pointer coordinates stay aligned.
     const scale = {compact:.8,comfortable:1,large:1.2}[d.size];
@@ -110,13 +120,13 @@ const WorkbenchAdapters = (() => {
     const radius = {square:'0px',soft:'12px',pill:'999px'}[d.radius];
     if (radius) {
       css += `.${cls}.${cls},.${cls}::before,.${cls}::after {border-radius:${radius} !important;}`;
-      const surfaces = {'cta-layer-fan':'.face','cta-gshadow':'.face','cta-halo':'.face,.ring','cta-stretch':'.skin','cta-tag':'.face','cta-pulltab':'.top,.base','cta-rings':'.pr,.core','cta-dial':'.knob','cta-well':'.ring,.core','cta-magnet':'.disc'};
+      const surfaces = {'cta-cube':'.f','cta-flip':'.side','cta-board':'.a,.b','cta-curl':'.face,.under','cta-envelope':'.front,.back','cta-dogear':'.fill','cta-layer-fan':'.face','cta-gshadow':'.face','cta-halo':'.face,.ring','cta-stretch':'.skin','cta-tag':'.face','cta-pulltab':'.top,.base','cta-rings':'.pr,.core','cta-dial':'.knob','cta-well':'.ring,.core','cta-magnet':'.disc'};
       if (surfaces[b.cls]) css += surfaces[b.cls].split(',').map(s => `.${cls} ${s}`).join(',') + `{border-radius:${radius} !important;}`;
       if (b.cls === 'cta-tag') css += `.${cls}.${cls},.${cls} .face{clip-path:none;}`;
     }
     return css;
   }
-  function setupFor(b, d, cls, spring) {
+  function setupFor(b, d, cls, spring, sparkle) {
     if (!b.setup) return '';
     let source = b.setup.toString().replaceAll(b.cls, cls);
     if (b.cls === 'cta-letters') source = source.replace("word.innerHTML = [...text].map((c) => `<span>${c === ' ' ? '&nbsp;' : c}</span>`).join('');", "word.replaceChildren(...Array.from(text, c => { const span = document.createElement('span'); span.textContent = c === ' ' ? '\\u00a0' : c; return span; }));");
@@ -133,7 +143,7 @@ const WorkbenchAdapters = (() => {
   const setTimeout = (fn, ms, ...args) => window.setTimeout(fn, ms * rate, ...args);
   const setInterval = (fn, ms, ...args) => window.setInterval(fn, ms * rate, ...args);`;
     source = source.replace(/duration: (reduced \? 0 : \d+)/g, 'duration: ($1) * rate');
-    return `function setupWorkbench(el) {\n${clocks}\n${source.includes('makeSpring') ? spring.toString() : ''}\n${source}\nreturn ${b.setup.name}(el);\n}`;
+    return `function setupWorkbench(el) {\n${clocks}\n${source.includes('makeSpring') ? spring.toString() : ''}\n${source.includes('SPARKLE') ? 'const SPARKLE = ' + JSON.stringify(sparkle) + ';' : ''}\n${source}\nreturn ${b.setup.name}(el);\n}`;
   }
   return {labelFor,customize,setupFor};
 })();

@@ -66,7 +66,7 @@ The tray holds up to five buttons with live previews. Select a button's name to
 edit it; use its × to remove it. If the tray is full, choose which button to
 replace. Removed buttons keep their saved edits for when you add them again.
 
-- All 91 buttons support label, size, corners, icon, palette, slower/no motion,
+- All 108 buttons support label, size, corners, icon, palette, slower/no motion,
   and loading/success previews. Animated letters, repeated text, circular SVG text,
   reflections, and JavaScript effects retain their structure. Icon-only controls
   get an editable caption. Alternate action messages (e.g. “Order placed”) retain
